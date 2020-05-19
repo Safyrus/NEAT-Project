@@ -3,6 +3,8 @@ package nn;
 import java.util.ArrayList;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.BasicStroke;
 
 public class Neuron {
 
@@ -45,20 +47,25 @@ public class Neuron {
         this.y = y;
     }
 
-    public int getLinkNumber()
-    {
+    public int getLinkNumber() {
         return inputs_w.size();
     }
 
-    public double getWeight(int i){
-        if(inputs_w.size() > i)
+    public double getWeight(int i) {
+        if (inputs_w.size() > i)
             return inputs_w.get(i);
         return 0;
     }
 
-    public void setWeight(int i, double v){
-        if(inputs_w.size() > i)
+    public void setWeight(int i, double v) {
+        if (inputs_w.size() > i)
             inputs_w.set(i, v);
+    }
+
+    public Neuron getNeuron(int i) {
+        if (inputs_n.size() > i)
+            return inputs_n.get(i);
+        return null;
     }
 
     public void addConnection(Neuron n, double w) {
@@ -100,17 +107,28 @@ public class Neuron {
     }
 
     public void display(Graphics g) {
-        g.setColor(new Color(0, 0, 0));
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setStroke(new BasicStroke(2));
+
         for (int i = 0; i < inputs_n.size(); i++) {
             Neuron n = inputs_n.get(i);
-            g.drawLine(x, y, n.x, n.y);
-            g.drawString(String.format ("%.4f", inputs_w.get(i)), x - n.x, y - 10);
+            double w = inputs_w.get(i);
+            int v = Math.abs((int) (w * 100));
+            if (v > 255) {
+                v = 255;
+            }
+            if (w > 0) {
+                g.setColor(new Color(0, v, 0));
+            } else {
+                g.setColor(new Color(v, 0, 0));
+            }
+            g2.drawLine(x, y, n.x, n.y);
+            // g.drawString(String.format ("%.4f", inputs_w.get(i)), x - n.x, y - 10);
         }
 
         int size = 10;
-        int value = Math.abs((int)(res*100));
-        if(value > 255)
-        {
+        int value = Math.abs((int) (res * 100));
+        if (value > 255) {
             value = 255;
         }
         if (res < 0) {
