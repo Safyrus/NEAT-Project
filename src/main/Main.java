@@ -13,14 +13,19 @@ public class Main {
         fenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         fenetre.setContentPane(canvas);
         fenetre.setVisible(true);
-        
+
         boolean stop = false;
         int fps = 20;
+        int fpsCount = 0;
 
         while (!stop) {
             canvas.step();
             canvas.repaint();
-            Thread.sleep(1000/fps);
+            fpsCount++;
+            if (fpsCount % fps == 0) {
+                System.out.println(fpsCount / fps);
+            }
+            Thread.sleep(1000 / fps);
         }
     }
 

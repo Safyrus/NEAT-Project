@@ -8,8 +8,6 @@ import nn.NeuralNetwork;
 
 public class Creature extends Entity {
 
-    private double energy;
-    private double angle;
     private NeuralNetwork nn;
     private ArrayList<Integer> inputAction;
     private ArrayList<Integer> outputAction;
@@ -18,10 +16,14 @@ public class Creature extends Entity {
     private static final int ACT_IN_CST = 1;
     private static final int ACT_IN_CST_NEG = 2;
     private static final int ACT_OUT_FORWARD = 2;
+    private static final int ACT_OUT_ROTATE = 3;
 
     public Creature() {
+        super();
         energy = 100;
         angle = Math.random() * 360;
+        size = 20;
+
         nn = new NeuralNetwork();
         inputAction = new ArrayList<>();
         outputAction = new ArrayList<>();
@@ -36,10 +38,23 @@ public class Creature extends Entity {
     @Override
     public void display(Graphics g) {
         g.setColor(new Color(0, 0, 200));
-        g.fillOval((int) x - 10, (int) y - 10, 20, 20);
+        g.fillOval((int)( x - size/2), (int)( y - size/2), (int)size, (int)size);
         g.setColor(new Color(0, 0, 0));
-        g.drawLine((int) x, (int) y, (int) (x + (Math.cos(angle) * 10)), (int) (y + (Math.sin(angle) * 10)));
+        g.drawLine((int) x, (int) y, (int) (x + (Math.cos(angle) * size/2)), (int) (y + (Math.sin(angle) * size/2)));
+    }
+
+    public void displayNN(Graphics g) {
+        g.setColor(new Color(255, 255, 255, 128));
+        g.fillRect(0, 0, nn.getLayerSize()*40+50, 80);
         nn.display(g);
+        g.setColor(new Color(0, 0, 0));
+        for (int i = 0; i < inputAction.size(); i++) {
+            g.drawString(""+inputAction.get(i), 5, 20+i*10);
+        }
+        for (int i = 0; i < outputAction.size(); i++) {
+            g.drawString(""+outputAction.get(i), 15, 20+i*10);
+        }
+        g.drawString(""+energy, 30, 10);
     }
 
     @Override
@@ -53,6 +68,24 @@ public class Creature extends Entity {
             double res = nn.getOutputNeuron(i).getRes();
             actionOut(outputAction.get(i), res);
         }
+        energy -= 0.1;
+    }
+
+    public ArrayList<Entity> eat(ArrayList<Entity> list) {
+        ArrayList<Entity> tmp = new ArrayList<>();
+        tmp.addAll(list);
+        for (int i = 0; i < tmp.size(); i++) {
+            Entity e = tmp.get(i);
+            if(e.getClass() == Food.class) {
+                double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
+                if(dist < (size/2) + (e.size/2)) {
+                    energy += e.getEnergy();
+                    tmp.remove(i);
+                    i--;
+                }
+            }
+        }
+        return tmp;
     }
 
     private double actionIn(int a) {

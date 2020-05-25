@@ -66,6 +66,10 @@ public class NeuralNetwork {
         return null;
     }
 
+    public int getLayerSize() {
+        return network.size();
+    }
+
     public int getInputSize() {
         return network.get(0).size();
     }

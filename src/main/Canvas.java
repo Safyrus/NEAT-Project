@@ -1,36 +1,38 @@
 package main;
 
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import javax.swing.JPanel;
 
 import entity.Creature;
-import entity.Food;
-import nn.NeuralNetwork;
+import entity.Entity;
+//import nn.NeuralNetwork;
 import world.World;
 
-public class Canvas extends JPanel {
+public class Canvas extends JPanel implements MouseListener {
     private static final long serialVersionUID = 1L;
 
-    private NeuralNetwork nn;
+    //private NeuralNetwork nn;
     private World world;
+    private Creature crea;
 
-    public Canvas()
-    {
-        nn = new NeuralNetwork();
+    public Canvas() {
+        this.addMouseListener(this);
+        //nn = new NeuralNetwork();
         world = new World(400, 400);
-        for (int i = 0; i < 10; i++) {
-            Food f = new Food();
-            f.setX(Math.random()*world.getW());
-            f.setY(Math.random()*world.getH());
-            world.addEntity(f);
+        for (int i = 0; i < 20; i++) {
+            Creature c = new Creature();
+            c.setX(Math.random() * world.getW());
+            c.setY(Math.random() * world.getH());
+            world.addEntity(c);
         }
-        world.addEntity(new Creature());
+        crea = null;
     }
 
-    public void step()
-    {
-        //nn.step();
-        //nn.mutate();
+    public void step() {
+        // nn.step();
+        // nn.mutate();
         world.step();
     }
 
@@ -38,6 +40,37 @@ public class Canvas extends JPanel {
         super.paint(g);
 
         world.display(g);
-        //nn.display(g);
+        if (crea != null) {
+            crea.displayNN(g);
+        }
+        // nn.display(g);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        Entity entity = world.MouseGetEntity(e.getX(), e.getY());
+        if (entity != null) {
+            if (entity.getClass() == Creature.class) {
+                crea = (Creature) entity;
+            }
+        } else {
+            crea = null;
+        }
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 }
