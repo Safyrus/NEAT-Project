@@ -21,8 +21,8 @@ public class Canvas extends JPanel implements MouseListener {
         this.addMouseListener(this);
         //nn = new NeuralNetwork();
         world = new World(400, 400);
-        for (int i = 0; i < 20; i++) {
-            Creature c = new Creature();
+        for (int i = 0; i < 4; i++) {
+            Creature c = new Creature(world);
             c.setX(Math.random() * world.getW());
             c.setY(Math.random() * world.getH());
             world.addEntity(c);
@@ -41,6 +41,7 @@ public class Canvas extends JPanel implements MouseListener {
 
         world.display(g);
         if (crea != null) {
+            crea.displayHighlight(g);
             crea.displayNN(g);
         }
         // nn.display(g);

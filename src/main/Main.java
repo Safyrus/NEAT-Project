@@ -22,9 +22,9 @@ public class Main {
             canvas.step();
             canvas.repaint();
             fpsCount++;
-            if (fpsCount % fps == 0) {
+            /*if (fpsCount % fps == 0) {
                 System.out.println(fpsCount / fps);
-            }
+            }*/
             Thread.sleep(1000 / fps);
         }
     }

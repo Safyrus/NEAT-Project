@@ -1,12 +1,10 @@
 package world;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.awt.Color;
 import java.awt.Graphics;
 
-import entity.Creature;
 import entity.Entity;
 import entity.Food;
 
@@ -77,8 +75,8 @@ public class World {
 
             double ex = entity.getX();
             double ey = entity.getY();
-            int cx = (int) (ex / cellSize);
-            int cy = (int) (ey / cellSize);
+            // int cx = (int) (ex / cellSize);
+            // int cy = (int) (ey / cellSize);
 
             if (ex < 0)
                 entity.setX(ex + w);
@@ -88,24 +86,27 @@ public class World {
                 entity.setY(ey + h);
             if (ey > h)
                 entity.setY(ey - h);
-            if (entity.getClass() == Creature.class) {
-                Creature crea = (Creature) entity;
-                ArrayList<Entity> list = getLocalEntity(cx, cy);
-                ArrayList<Entity> tmp = crea.eat(list);
-                list.removeAll(tmp);
-                entities.removeAll(list);
-                i = entities.indexOf(crea);
-                if (crea.getEnergy() <= 0) {
-                    entities.remove(crea);
-                    i--;
-                }
+
+            i = entities.indexOf(entity);
+            if (entity.getEnergy() <= 0) {
+                entities.remove(entity);
+                i--;
             }
+            /*
+             * if (entity.getClass() == Creature.class) { Creature crea = (Creature) entity;
+             * ArrayList<Entity> list = getLocalEntity(cx, cy); ArrayList<Entity> tmp =
+             * crea.eat(list); list.removeAll(tmp); entities.removeAll(list); i =
+             * entities.indexOf(crea); if (crea.getEnergy() <= 0) { entities.remove(crea);
+             * i--; } }
+             */
         }
-        if (Math.random() < 1) {
-            Food f = new Food();
-            f.setX(Math.random() * w);
-            f.setY(Math.random() * h);
-            entities.add(f);
+        if (Math.random() < 0.5) {
+            for (int i = 0; i < 5; i++) {
+                Food f = new Food(this);
+                f.setX(Math.random() * w);
+                f.setY(Math.random() * h);
+                entities.add(f);
+            }
         }
     }
 
@@ -126,22 +127,24 @@ public class World {
         return null;
     }
 
-    private ArrayList<Entity> getLocalEntity(int lx, int ly) {
+    public ArrayList<Entity> getLocalEntity(int xx, int yy) {
         ArrayList<Entity> res = new ArrayList<>();
 
+        int lx = xx / cellSize;
+        int ly = yy / cellSize;
         int gw = w / cellSize;
         int gh = h / cellSize;
-        if(lx >= gw) {
+        if (lx >= gw) {
             lx--;
         }
-        if(ly >= gh) {
+        if (ly >= gh) {
             ly--;
         }
         int lowY = (ly - 1 < 0) ? (ly - 1 + gh) : (ly - 1);
         int lowX = (lx - 1 < 0) ? (lx - 1 + gw) : (lx - 1);
         int higY = (ly + 1 >= gh) ? (ly + 1 - gh) : (ly + 1);
         int higX = (lx + 1 >= gw) ? (lx + 1 - gw) : (lx + 1);
-        //System.out.println(lx+","+ly+" "+lowX+","+lowY+" "+higX+","+higY);
+        // System.out.println(lx+","+ly+" "+lowX+","+lowY+" "+higX+","+higY);
         if (grid.get(lowY * gw + lowX) != null)
             res.addAll(grid.get(lowY * gw + lowX));
         if (grid.get(lowY * gw + lx) != null)

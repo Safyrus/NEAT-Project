@@ -3,10 +3,12 @@ package entity;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import world.World;
+
 public class Food extends Entity {
 
-    public Food() {
-        super();
+    public Food(World world) {
+        super(world);
         energy = Math.random()*9 + 1;
     }
 

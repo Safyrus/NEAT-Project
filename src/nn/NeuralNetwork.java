@@ -9,30 +9,26 @@ public class NeuralNetwork {
     private double mutChance;
 
     public NeuralNetwork() {
-        mutChance = Math.random() * 0.25;
+        mutChance = Math.random();
 
         network = new ArrayList<>();
         ArrayList<Neuron> layer = new ArrayList<>();
         layer.add(new Neuron());
-        network.add(layer);
-        layer = new ArrayList<>();
         layer.add(new Neuron());
-        network.add(layer);
-        /*layer.add(new Neuron());
-        layer.get(0).setRes(0.8);
-        layer.add(new Neuron());
-        layer.get(1).setRes(-1.2);
-        network.add(layer);
-        layer = new ArrayList<>();
         layer.add(new Neuron());
         network.add(layer);
         layer = new ArrayList<>();
         layer.add(new Neuron());
         layer.add(new Neuron());
-        network.add(layer);*/
+        layer.add(new Neuron());
+        network.add(layer);
 
         Neuron n = network.get(0).get(0);
-        network.get(1).get(0).addConnection(n, Math.random() * 2 - 1);
+        network.get(1).get(0).addConnection(n, 1);
+        n = network.get(0).get(1);
+        network.get(1).get(1).addConnection(n, Math.random() * 2 - 1);
+        n = network.get(0).get(2);
+        network.get(1).get(2).addConnection(n, 0.75);
     }
 
     public void mutate() {
@@ -75,20 +71,38 @@ public class NeuralNetwork {
     }
 
     public Neuron getOutputNeuron(int i) {
-        if (network.get(network.size()-1).size() > i) {
-            return network.get(network.size()-1).get(i);
+        if (network.get(network.size() - 1).size() > i) {
+            return network.get(network.size() - 1).get(i);
         }
         return null;
     }
 
     public int getOutputSize() {
-        return network.get(network.size()-1).size();
+        return network.get(network.size() - 1).size();
     }
 
     public NeuralNetwork copy() {
         NeuralNetwork newNn = new NeuralNetwork();
-        newNn.mutChance = this.mutChance;
-        newNn.network = this.network;
+        newNn.mutChance = this.mutChance + (Math.random()*0.1-0.05);
+        newNn.network = new ArrayList<>();
+
+        for (int i = 0; i < network.size(); i++) {
+            newNn.network.add(new ArrayList<>());
+            for (int j = 0; j < network.get(i).size(); j++) {
+                newNn.network.get(i).add(new Neuron());
+                if (i > 0) {
+                    Neuron nOld = network.get(i).get(j);
+                    Neuron nNew = newNn.network.get(i).get(j);
+                    for (int k = 0; k < nOld.getLinkNumber(); k++) {
+                        int index = network.get(i-1).indexOf(nOld.getNeuron(k));
+                        if(index != -1){
+                            nNew.addConnection(newNn.network.get(i-1).get(index), nOld.getWeight(k));
+                        }
+                    }
+                }
+            }
+        }
+
         return newNn;
     }
 
@@ -118,6 +132,14 @@ public class NeuralNetwork {
                 n.display(g);
             }
         }
+    }
+
+    public int neuronCount() {
+        int res = 0;
+        for (int i = 0; i < network.size(); i++) {
+            res += network.get(i).size();
+        }
+        return res;
     }
 
     private void mutAddLayerNeuron() {

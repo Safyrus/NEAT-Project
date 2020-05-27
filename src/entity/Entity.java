@@ -2,7 +2,10 @@ package entity;
 
 import java.awt.Graphics;
 
+import world.World;
+
 public abstract class Entity {
+    protected World world;
     protected double x;
     protected double y;
 
@@ -10,7 +13,8 @@ public abstract class Entity {
     protected double angle;
     protected double size;
 
-    public Entity() {
+    public Entity(World world) {
+        this.world = world;
         energy = 10;
         angle = 0;
         size = 10;
@@ -51,8 +55,13 @@ public abstract class Entity {
 
     public abstract void step();
 
+    public boolean collide(Entity e) {
+        double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
+        return dist < (size / 2) + (e.size / 2);
+    }
+
     public boolean collide(int xx, int yy) {
         double dist = Math.sqrt(Math.pow(yy - y, 2) + Math.pow(xx - x, 2));
-        return dist <= size/2;
+        return dist < size / 2;
     }
 }
