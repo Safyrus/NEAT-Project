@@ -63,7 +63,7 @@ public class Creature extends Entity {
     public void displayNN(Graphics g) {
         g.setColor(new Color(255, 255, 255, 128));
         g.fillRect(0, 0, nn.getLayerSize() * 40 + 50, 80);
-        nn.display(g);
+        nn.display(g, 0, 0);
         g.setColor(new Color(0, 0, 0));
         for (int i = 0; i < inputAction.size(); i++) {
             g.drawString("" + inputAction.get(i), 5, 20 + i * 10);
@@ -234,7 +234,6 @@ public class Creature extends Entity {
         }
         Creature e = new Creature(world);
         e.nn = nn.copy();
-        e.nn.mutate();
         e.x = x;
         e.y = y;
         e = copyAction(e);

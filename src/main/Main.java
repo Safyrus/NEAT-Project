@@ -10,23 +10,18 @@ public class Main {
         fenetre.setSize(640, 480);
         Canvas canvas = new Canvas();
         fenetre.setLocationRelativeTo(null);
+        fenetre.addKeyListener(canvas);
         fenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         fenetre.setContentPane(canvas);
         fenetre.setVisible(true);
 
         boolean stop = false;
-        int fps = 20;
-        int fpsCount = 0;
+        int fps = 60;
 
         while (!stop) {
             canvas.step();
             canvas.repaint();
-            fpsCount++;
-            /*if (fpsCount % fps == 0) {
-                System.out.println(fpsCount / fps);
-            }*/
             Thread.sleep(1000 / fps);
         }
     }
-
 }
