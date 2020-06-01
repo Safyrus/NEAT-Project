@@ -30,10 +30,10 @@ public class Creature extends Entity {
         super(world);
         energy = 100;
         angle = Math.random() * 360;
-        size = 20;
+        size = Math.random()*10+15;
         birthWait = 100;
         age = 0;
-        energyMax = 500;
+        energyMax = size*20;
 
         nn = new NeuralNetwork();
         inputAction = new ArrayList<>();
@@ -103,22 +103,17 @@ public class Creature extends Entity {
             energy = energyMax;
     }
 
-    private ArrayList<Entity> eat(ArrayList<Entity> list) {
-        ArrayList<Entity> tmp = new ArrayList<>();
-        tmp.addAll(list);
-        for (int i = 0; i < tmp.size(); i++) {
-            Entity e = tmp.get(i);
+    private void eat(ArrayList<Entity> list) {
+        for (int i = 0; i < list.size(); i++) {
+            Entity e = list.get(i);
             if (e.getClass() == Food.class) {
                 double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
                 if (dist < (size / 2) + (e.size / 2)) {
                     energy += e.getEnergy();
                     e.setEnergy(0);
-                    tmp.remove(i);
-                    i--;
                 }
             }
         }
-        return tmp;
     }
 
     private double actionIn(int a) {
@@ -215,13 +210,13 @@ public class Creature extends Entity {
 
     private void act_out_forward(double res) {
         energy -= 0.02 * Math.abs(res);
-        x += Math.cos(angle) * res;
-        y += Math.sin(angle) * res;
+        x += Math.cos(angle) * res * (10/size);
+        y += Math.sin(angle) * res * (10/size);
     }
 
     private void act_out_rotate(double res) {
         energy -= 0.02 * Math.abs(res);
-        angle += res;
+        angle += res * (10/size);
     }
 
     private void act_out_eat(double res) {
@@ -230,11 +225,7 @@ public class Creature extends Entity {
             return;
         }
         ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
-        ArrayList<Entity> tmp = eat(list);
-        /*list.removeAll(tmp);
-        for (Entity e : list) {
-            world.removeEntity(e);
-        }*/
+        eat(list);
     }
 
     private void act_out_birth(double res) {
@@ -246,6 +237,7 @@ public class Creature extends Entity {
         e.nn = nn.copy();
         e.x = x;
         e.y = y;
+        e.size = size + (Math.random()*2-1);
         e = copyAction(e);
         birthWait = 100;
         if (energy < 100) {

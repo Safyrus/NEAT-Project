@@ -17,6 +17,7 @@ public class World {
 
     private ArrayList<Entity> entities;
     private ArrayList<ArrayList<Entity>> grid;
+    private ArrayList<Entity> toAdd;
     private int cellSize;
 
     public World(int w, int h) {
@@ -25,6 +26,7 @@ public class World {
         this.w = w;
         this.h = h;
 
+        toAdd = new ArrayList<>();
         this.entities = new ArrayList<>();
         cellSize = 40;
     }
@@ -33,7 +35,8 @@ public class World {
 
         g.setColor(new Color(128, 128, 128));
         g.fillRect(x + offx, y + offy, w, h);
-        for (Entity entity : entities) {
+        for (int i = 0; i < entities.size(); i++) {
+            Entity entity = entities.get(i);
             entity.display(g, x + offx, y + offy);
         }
         g.setColor(new Color(0, 0, 0));
@@ -53,7 +56,7 @@ public class World {
     }
 
     public void addEntity(Entity e) {
-        entities.add(e);
+        toAdd.add(e);
     }
 
     public void removeEntity(Entity e) {
@@ -82,8 +85,9 @@ public class World {
             }
             grid.get(i).add(entity);
         }
-        for (int i = 0; i < entities.size(); i++) {
-            Entity entity = entities.get(i);
+        ListIterator<Entity> iter = entities.listIterator();
+        while (iter.hasNext()) {
+            Entity entity = iter.next();
             entity.step();
 
             double ex = entity.getX();
@@ -98,15 +102,14 @@ public class World {
             if (ey > h)
                 entity.setY(ey - h);
 
-            i = entities.indexOf(entity);
-        }
-        ListIterator<Entity> iter = entities.listIterator();
-        while (iter.hasNext()) {
-            Entity entity = iter.next();
             if (entity.getEnergy() <= 0) {
                 iter.remove();
             }
         }
+        for (int i = 0; i < toAdd.size(); i++) {
+            entities.add(toAdd.get(i));
+        }
+        toAdd = new ArrayList<>();
         if (Math.random() < 0.5) {
             for (int i = 0; i < (w * h) / 40000; i++) {
                 Food f = new Food(this);
