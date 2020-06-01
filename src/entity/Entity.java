@@ -51,6 +51,10 @@ public abstract class Entity {
         return energy;
     }
 
+    public void setEnergy(double e) {
+        energy = e;
+    }
+
     public abstract void display(Graphics g, int offx, int offy);
 
     public abstract void step();

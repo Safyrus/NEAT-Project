@@ -112,6 +112,7 @@ public class Creature extends Entity {
                 double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
                 if (dist < (size / 2) + (e.size / 2)) {
                     energy += e.getEnergy();
+                    e.setEnergy(0);
                     tmp.remove(i);
                     i--;
                 }
@@ -230,10 +231,10 @@ public class Creature extends Entity {
         }
         ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
         ArrayList<Entity> tmp = eat(list);
-        list.removeAll(tmp);
+        /*list.removeAll(tmp);
         for (Entity e : list) {
             world.removeEntity(e);
-        }
+        }*/
     }
 
     private void act_out_birth(double res) {

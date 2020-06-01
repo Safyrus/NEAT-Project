@@ -2,6 +2,7 @@ package world;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ListIterator;
 import java.awt.Color;
 import java.awt.Graphics;
 
@@ -31,18 +32,18 @@ public class World {
     public void display(Graphics g, int offx, int offy) {
 
         g.setColor(new Color(128, 128, 128));
-        g.fillRect(x+offx, y+offy, w, h);
+        g.fillRect(x + offx, y + offy, w, h);
         for (Entity entity : entities) {
-            entity.display(g, x+offx, y+offy);
+            entity.display(g, x + offx, y + offy);
         }
         g.setColor(new Color(0, 0, 0));
         for (int i = 0; i < h / cellSize; i++) {
             for (int j = 0; j < w / cellSize; j++) {
                 if (grid.get(i * w / cellSize + j) != null) {
-                    g.drawString("" + grid.get(i * w / cellSize + j).size(), j * cellSize + cellSize / 2 + x+offx,
-                            i * cellSize + cellSize / 2 + y+offy);
+                    g.drawString("" + grid.get(i * w / cellSize + j).size(), j * cellSize + cellSize / 2 + x + offx,
+                            i * cellSize + cellSize / 2 + y + offy);
                 } else {
-                    g.drawString("0", j * cellSize + cellSize / 2 + x+offx, i * cellSize + cellSize / 2 + y+offy);
+                    g.drawString("0", j * cellSize + cellSize / 2 + x + offx, i * cellSize + cellSize / 2 + y + offy);
                 }
             }
         }
@@ -68,11 +69,11 @@ public class World {
             int cy = (int) (entity.getY() / cellSize);
             int cw = (int) (w / cellSize);
             int ch = (int) (h / cellSize);
-            if(cx >= cw) {
-                cx = cw-1;
+            if (cx >= cw) {
+                cx = cw - 1;
             }
-            if(cy >= ch) {
-                cy = ch-1;
+            if (cy >= ch) {
+                cy = ch - 1;
             }
             int i = cy * cw + cx;
             ArrayList<Entity> list = grid.get(i);
@@ -98,13 +99,16 @@ public class World {
                 entity.setY(ey - h);
 
             i = entities.indexOf(entity);
+        }
+        ListIterator<Entity> iter = entities.listIterator();
+        while (iter.hasNext()) {
+            Entity entity = iter.next();
             if (entity.getEnergy() <= 0) {
-                entities.remove(entity);
-                i--;
+                iter.remove();
             }
         }
         if (Math.random() < 0.5) {
-            for (int i = 0; i < (w*h)/40000; i++) {
+            for (int i = 0; i < (w * h) / 40000; i++) {
                 Food f = new Food(this);
                 f.setX(Math.random() * w);
                 f.setY(Math.random() * h);
