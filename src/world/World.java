@@ -28,23 +28,27 @@ public class World {
         cellSize = 40;
     }
 
-    public void display(Graphics g) {
+    public void display(Graphics g, int offx, int offy) {
+
         g.setColor(new Color(128, 128, 128));
-        g.fillRect(x, y, w, h);
+        g.fillRect(x+offx, y+offy, w, h);
         for (Entity entity : entities) {
-            entity.display(g);
+            entity.display(g, x+offx, y+offy);
         }
         g.setColor(new Color(0, 0, 0));
         for (int i = 0; i < h / cellSize; i++) {
             for (int j = 0; j < w / cellSize; j++) {
                 if (grid.get(i * w / cellSize + j) != null) {
-                    g.drawString("" + grid.get(i * w / cellSize + j).size(), j * cellSize + cellSize / 2,
-                            i * cellSize + cellSize / 2);
+                    g.drawString("" + grid.get(i * w / cellSize + j).size(), j * cellSize + cellSize / 2 + x+offx,
+                            i * cellSize + cellSize / 2 + y+offy);
                 } else {
-                    g.drawString("0", j * cellSize + cellSize / 2, i * cellSize + cellSize / 2);
+                    g.drawString("0", j * cellSize + cellSize / 2 + x+offx, i * cellSize + cellSize / 2 + y+offy);
                 }
             }
         }
+
+        g.setColor(new Color(255, 0, 0));
+        g.drawString(x + " " + y, 20, 20);
     }
 
     public void addEntity(Entity e) {
@@ -62,7 +66,15 @@ public class World {
         for (Entity entity : entities) {
             int cx = (int) (entity.getX() / cellSize);
             int cy = (int) (entity.getY() / cellSize);
-            int i = cy * (w / cellSize) + cx;
+            int cw = (int) (w / cellSize);
+            int ch = (int) (h / cellSize);
+            if(cx >= cw) {
+                cx = cw-1;
+            }
+            if(cy >= ch) {
+                cy = ch-1;
+            }
+            int i = cy * cw + cx;
             ArrayList<Entity> list = grid.get(i);
             if (list == null) {
                 grid.set(i, new ArrayList<>());
@@ -75,8 +87,6 @@ public class World {
 
             double ex = entity.getX();
             double ey = entity.getY();
-            // int cx = (int) (ex / cellSize);
-            // int cy = (int) (ey / cellSize);
 
             if (ex < 0)
                 entity.setX(ex + w);
@@ -92,16 +102,9 @@ public class World {
                 entities.remove(entity);
                 i--;
             }
-            /*
-             * if (entity.getClass() == Creature.class) { Creature crea = (Creature) entity;
-             * ArrayList<Entity> list = getLocalEntity(cx, cy); ArrayList<Entity> tmp =
-             * crea.eat(list); list.removeAll(tmp); entities.removeAll(list); i =
-             * entities.indexOf(crea); if (crea.getEnergy() <= 0) { entities.remove(crea);
-             * i--; } }
-             */
         }
         if (Math.random() < 0.5) {
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < (w*h)/40000; i++) {
                 Food f = new Food(this);
                 f.setX(Math.random() * w);
                 f.setY(Math.random() * h);

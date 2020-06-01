@@ -47,22 +47,31 @@ public class Creature extends Entity {
     }
 
     @Override
-    public void display(Graphics g) {
+    public void display(Graphics g, int offx, int offy) {
+        double tmpX = x;
+        double tmpY = y;
+        x += offx;
+        y += offy;
+
         g.setColor(new Color(0, 0, 200));
         g.fillOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
         g.setColor(new Color(0, 0, 0));
         g.drawLine((int) x, (int) y, (int) (x + (Math.cos(angle) * size / 2)),
                 (int) (y + (Math.sin(angle) * size / 2)));
+
+        x = tmpX;
+        y = tmpY;
     }
 
-    public void displayHighlight(Graphics g) {
+    public void displayHighlight(Graphics g, int offx, int offy) {
         g.setColor(new Color(255, 255, 0));
-        g.drawOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
+        g.drawOval((int) (x + offx - size / 2), (int) (y + offy - size / 2), (int) size, (int) size);
     }
 
     public void displayNN(Graphics g) {
         g.setColor(new Color(255, 255, 255, 128));
-        g.fillRect(0, 0, nn.getLayerSize() * 40 + 50, 80);
+        int rectH = Math.max(nn.getInputSize(), nn.getOutputSize());
+        g.fillRect(0, 0, nn.getLayerSize() * 40 + 50, rectH*40 + 40);
         nn.display(g, 0, 0);
         g.setColor(new Color(0, 0, 0));
         for (int i = 0; i < inputAction.size(); i++) {
@@ -88,8 +97,8 @@ public class Creature extends Entity {
         if (birthWait > 0)
             birthWait--;
 
-        energy -= 0.005 * nn.neuronCount() + age;
-        age += 0.0007;
+        energy -= 0.001 * nn.neuronCount() + age;
+        age += 0.0001;
         if (energy > energyMax)
             energy = energyMax;
     }
@@ -176,22 +185,22 @@ public class Creature extends Entity {
     }
 
     private double act_in_cst() {
-        energy -= 0.005;
+        energy -= 0.001;
         return 1;
     }
 
     private double act_in_cstNeg() {
-        energy -= 0.005;
+        energy -= 0.001;
         return -1;
     }
 
     private double act_in_energy() {
-        energy -= 0.005;
+        energy -= 0.001;
         return energy / 100;
     }
 
     private double act_in_collide() {
-        energy -= 0.02;
+        energy -= 0.005;
         ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
 
         for (int i = 0; i < list.size(); i++) {
@@ -204,18 +213,18 @@ public class Creature extends Entity {
     }
 
     private void act_out_forward(double res) {
-        energy -= 0.1 * Math.abs(res);
+        energy -= 0.02 * Math.abs(res);
         x += Math.cos(angle) * res;
         y += Math.sin(angle) * res;
     }
 
     private void act_out_rotate(double res) {
-        energy -= 0.1 * Math.abs(res);
+        energy -= 0.02 * Math.abs(res);
         angle += res;
     }
 
     private void act_out_eat(double res) {
-        energy -= 0.5 * Math.max(res, 0);
+        energy -= 0.1 * Math.max(res, 0);
         if (res < 1) {
             return;
         }
@@ -228,7 +237,7 @@ public class Creature extends Entity {
     }
 
     private void act_out_birth(double res) {
-        energy -= 0.1 * Math.max(res, 0);
+        energy -= 0.02 * Math.max(res, 0);
         if (res < 1 || birthWait > 0) {
             return;
         }
