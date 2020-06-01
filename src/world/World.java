@@ -6,6 +6,7 @@ import java.util.ListIterator;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import entity.Creature;
 import entity.Entity;
 import entity.Food;
 
@@ -35,8 +36,12 @@ public class World {
 
         g.setColor(new Color(128, 128, 128));
         g.fillRect(x + offx, y + offy, w, h);
+        int creaCount = 0;
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
+            if(entity.getClass() == Creature.class) {
+                creaCount++;
+            }
             entity.display(g, x + offx, y + offy);
         }
         g.setColor(new Color(0, 0, 0));
@@ -52,7 +57,9 @@ public class World {
         }
 
         g.setColor(new Color(255, 0, 0));
-        g.drawString(x + " " + y, 20, 20);
+        g.drawString(x + " " + y, 20, 10);
+        g.drawString("All:" + entities.size(), 20, 30);
+        g.drawString("Crea:" + creaCount, 20, 40);
     }
 
     public void addEntity(Entity e) {
@@ -77,6 +84,12 @@ public class World {
             }
             if (cy >= ch) {
                 cy = ch - 1;
+            }
+            if (cx < 0) {
+                cx = 0;
+            }
+            if (cy < 0) {
+                cy = 0;
             }
             int i = cy * cw + cx;
             ArrayList<Entity> list = grid.get(i);
@@ -145,10 +158,16 @@ public class World {
         int gw = w / cellSize;
         int gh = h / cellSize;
         if (lx >= gw) {
-            lx--;
+            lx = gw-1;
         }
         if (ly >= gh) {
-            ly--;
+            ly = gh-1;
+        }
+        if (lx < 0) {
+            lx = 0;
+        }
+        if (ly < 0) {
+            ly = 0;
         }
         int lowY = (ly - 1 < 0) ? (ly - 1 + gh) : (ly - 1);
         int lowX = (lx - 1 < 0) ? (lx - 1 + gw) : (lx - 1);
