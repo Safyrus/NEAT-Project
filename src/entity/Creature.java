@@ -15,6 +15,7 @@ public class Creature extends Entity {
     private double birthWait;
     private double age;
     private double energyMax;
+    private double foodType;
 
     private static final int ACT_NOP = 0;
     private static final int ACT_IN_CST = 1;
@@ -34,6 +35,7 @@ public class Creature extends Entity {
         birthWait = 100;
         age = 0;
         energyMax = size*20;
+        foodType = 0.8;
 
         nn = new NeuralNetwork();
         inputAction = new ArrayList<>();
@@ -53,9 +55,19 @@ public class Creature extends Entity {
         x += offx;
         y += offy;
 
-        g.setColor(new Color(0, 0, 200));
+        int red = 55;
+        int green = 55;
+        //System.out.println(""+red+" "+green);
+        if(foodType < 0.5) {
+            red =  (int) ((0.5 - foodType) * 400);
+        }
+        if(foodType > 0.5) {
+            green =  (int) ((foodType - 0.5) * 400);
+        }
+        g.setColor(new Color(red, green, 55));
         g.fillOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
         g.setColor(new Color(0, 0, 0));
+        g.drawOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
         g.drawLine((int) x, (int) y, (int) (x + (Math.cos(angle) * size / 2)),
                 (int) (y + (Math.sin(angle) * size / 2)));
 
@@ -106,10 +118,17 @@ public class Creature extends Entity {
     private void eat(ArrayList<Entity> list) {
         for (int i = 0; i < list.size(); i++) {
             Entity e = list.get(i);
-            if (e.getClass() == Food.class) {
+            if (e.getClass() == Food.class && foodType > 0.25) {
                 double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
                 if (dist < (size / 2) + (e.size / 2)) {
-                    energy += e.getEnergy();
+                    energy += e.getEnergy() * foodType;
+                    e.setEnergy(0);
+                }
+            }
+            if (e.getClass() == Meat.class && foodType < 0.75) {
+                double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
+                if (dist < (size / 2) + (e.size / 2)) {
+                    energy += e.getEnergy() * (1-foodType);
                     e.setEnergy(0);
                 }
             }
@@ -238,6 +257,7 @@ public class Creature extends Entity {
         e.x = x;
         e.y = y;
         e.size = size + (Math.random()*2-1);
+        e.foodType = foodType + (Math.random()*0.02-0.01);
         e = copyAction(e);
         birthWait = 100;
         if (energy < 100) {

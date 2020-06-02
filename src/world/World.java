@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import entity.Creature;
 import entity.Entity;
 import entity.Food;
+import entity.Meat;
 
 public class World {
     private int x;
@@ -117,6 +118,13 @@ public class World {
 
             if (entity.getEnergy() <= 0) {
                 iter.remove();
+                if(entity.getClass() == Creature.class) {
+                    Meat m = new Meat(this);
+                    m.setX(entity.getX()+Math.random()*10 - 5);
+                    m.setY(entity.getY()+Math.random()*10 - 5);
+                    m.setEnergy(entity.getSize()/2);
+                    toAdd.add(m);
+                }
             }
         }
         for (int i = 0; i < toAdd.size(); i++) {

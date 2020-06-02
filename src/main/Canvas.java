@@ -29,7 +29,7 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         this.addMouseListener(this);
         nn = new NeuralNetwork();
         world = new World(800, 800);
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 10; i++) {
             Creature c = new Creature(world);
             c.setX(Math.random() * world.getW());
             c.setY(Math.random() * world.getH());
