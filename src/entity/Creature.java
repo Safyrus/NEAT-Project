@@ -20,21 +20,28 @@ public class Creature extends Entity {
     private static final int ACT_NOP = 0;
     private static final int ACT_IN_CST = 1;
     private static final int ACT_IN_CST_NEG = 2;
-    private static final int ACT_IN_ENERGY = 7;
-    private static final int ACT_OUT_FORWARD = 2;
-    private static final int ACT_OUT_ROTATE = 3;
-    private static final int ACT_OUT_EAT = 4;
-    private static final int ACT_IN_COLLIDE = 5;
-    private static final int ACT_OUT_BIRTH = 6;
+    private static final int ACT_OUT_FORWARD = 3;
+    private static final int ACT_OUT_ROTATE = 4;
+    private static final int ACT_OUT_EAT = 5;
+    private static final int ACT_IN_COLLIDE = 6;
+    private static final int ACT_OUT_BIRTH = 7;
+    private static final int ACT_IN_ENERGY = 8;
+    private static final int ACT_IN_COLLIDE_FOOD = 9;
+    private static final int ACT_IN_COLLIDE_MEAT = 10;
+    private static final int ACT_IN_COLLIDE_CREA = 11;
+    private static final int ACT_IN_SEE = 12;
+    private static final int ACT_OUT_ATK = 13;
+    private static final int ACT_OUT_TAKE = 14;
+    private static final int ACT_OUT_BE_RELEASE = 15;
 
     public Creature(World world) {
         super(world);
         energy = 100;
         angle = Math.random() * 360;
-        size = Math.random()*10+15;
+        size = Math.random() * 10 + 15;
         birthWait = 100;
         age = 0;
-        energyMax = size*20;
+        energyMax = size * 20;
         foodType = 0.8;
 
         nn = new NeuralNetwork();
@@ -57,12 +64,12 @@ public class Creature extends Entity {
 
         int red = 55;
         int green = 55;
-        //System.out.println(""+red+" "+green);
-        if(foodType < 0.5) {
-            red =  (int) ((0.5 - foodType) * 400);
+        // System.out.println(""+red+" "+green);
+        if (foodType < 0.5) {
+            red = (int) ((0.5 - foodType) * 400);
         }
-        if(foodType > 0.5) {
-            green =  (int) ((foodType - 0.5) * 400);
+        if (foodType > 0.5) {
+            green = (int) ((foodType - 0.5) * 400);
         }
         g.setColor(new Color(red, green, 55));
         g.fillOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
@@ -83,7 +90,7 @@ public class Creature extends Entity {
     public void displayNN(Graphics g) {
         g.setColor(new Color(255, 255, 255, 128));
         int rectH = Math.max(nn.getInputSize(), nn.getOutputSize());
-        g.fillRect(0, 0, nn.getLayerSize() * 40 + 50, rectH*40 + 40);
+        g.fillRect(0, 0, nn.getLayerSize() * 40 + 50, rectH * 40 + 40);
         nn.display(g, 0, 0);
         g.setColor(new Color(0, 0, 0));
         for (int i = 0; i < inputAction.size(); i++) {
@@ -92,7 +99,10 @@ public class Creature extends Entity {
         for (int i = 0; i < outputAction.size(); i++) {
             g.drawString("" + outputAction.get(i), 15, 20 + i * 10);
         }
-        g.drawString("" + energy, 30, 10);
+        g.drawString("" + String.format("%.3f", energy), 30, 10);
+        g.drawString("" + birthWait, 30, 22);
+        g.drawString("" + String.format("%.3f", energyMax), 80, 10);
+        g.drawString("" + String.format("%.2f", foodType), 80, 22);
     }
 
     @Override
@@ -128,7 +138,7 @@ public class Creature extends Entity {
             if (e.getClass() == Meat.class && foodType < 0.75) {
                 double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
                 if (dist < (size / 2) + (e.size / 2)) {
-                    energy += e.getEnergy() * (1-foodType);
+                    energy += e.getEnergy() * (1 - foodType);
                     e.setEnergy(0);
                 }
             }
@@ -142,7 +152,13 @@ public class Creature extends Entity {
             case ACT_IN_CST_NEG:
                 return act_in_cstNeg();
             case ACT_IN_COLLIDE:
-                return act_in_collide();
+                return act_in_collide(null);
+            case ACT_IN_COLLIDE_CREA:
+                return act_in_collide(Creature.class);
+            case ACT_IN_COLLIDE_FOOD:
+                return act_in_collide(Food.class);
+            case ACT_IN_COLLIDE_MEAT:
+                return act_in_collide(Meat.class);
             case ACT_IN_ENERGY:
                 return act_in_energy();
             default:
@@ -164,11 +180,14 @@ public class Creature extends Entity {
             case ACT_OUT_EAT:
                 act_out_eat(res);
                 break;
+            case ACT_OUT_ATK:
+                act_out_atk(res);
+                break;
         }
     }
 
     private int randomActIn() {
-        int ran = (int) (Math.random() * 4);
+        int ran = (int) (Math.random() * 7);
         switch (ran) {
             case 0:
                 return ACT_IN_CST;
@@ -178,13 +197,19 @@ public class Creature extends Entity {
                 return ACT_IN_COLLIDE;
             case 3:
                 return ACT_IN_ENERGY;
+            case 4:
+                return ACT_IN_COLLIDE_MEAT;
+            case 5:
+                return ACT_IN_COLLIDE_FOOD;
+            case 6:
+                return ACT_IN_COLLIDE_CREA;
             default:
                 return ACT_NOP;
         }
     }
 
     private int randomActOut() {
-        int ran = (int) (Math.random() * 4);
+        int ran = (int) (Math.random() * 5);
         switch (ran) {
             case 0:
                 return ACT_OUT_FORWARD;
@@ -194,6 +219,8 @@ public class Creature extends Entity {
                 return ACT_OUT_BIRTH;
             case 3:
                 return ACT_OUT_EAT;
+            case 4:
+                return ACT_OUT_ATK;
             default:
                 return ACT_NOP;
         }
@@ -214,13 +241,13 @@ public class Creature extends Entity {
         return energy / 100;
     }
 
-    private double act_in_collide() {
+    private double act_in_collide(Class c) {
         energy -= 0.005;
         ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
 
         for (int i = 0; i < list.size(); i++) {
             Entity e = list.get(i);
-            if (e != this && collide(e)) {
+            if (e != this && (c == e.getClass() || c == null) && collide(e)) {
                 return 1;
             }
         }
@@ -229,20 +256,20 @@ public class Creature extends Entity {
 
     private void act_out_forward(double res) {
         energy -= 0.02 * Math.abs(res);
-        x += Math.cos(angle) * res * (10/size);
-        y += Math.sin(angle) * res * (10/size);
+        x += Math.cos(angle) * res * (10 / size);
+        y += Math.sin(angle) * res * (10 / size);
     }
 
     private void act_out_rotate(double res) {
         energy -= 0.02 * Math.abs(res);
-        angle += res * (10/size);
+        angle += res * (10 / size);
     }
 
     private void act_out_eat(double res) {
-        energy -= 0.1 * Math.max(res, 0);
         if (res < 1) {
             return;
         }
+        energy -= 0.1 * res;
         ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
         eat(list);
     }
@@ -256,8 +283,8 @@ public class Creature extends Entity {
         e.nn = nn.copy();
         e.x = x;
         e.y = y;
-        e.size = size + (Math.random()*2-1);
-        e.foodType = foodType + (Math.random()*0.02-0.01);
+        e.size = size + (Math.random() * 2 - 1);
+        e.foodType = foodType + (Math.random() * 0.02 - 0.01);
         e = copyAction(e);
         birthWait = 100;
         if (energy < 100) {
@@ -267,6 +294,22 @@ public class Creature extends Entity {
             energy -= 100;
         }
         world.addEntity(e);
+    }
+
+    private void act_out_atk(double res) {
+        if (res < 0) {
+            return;
+        }
+        energy -= 0.2 * res;
+        ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
+        for (int i = 0; i < list.size(); i++) {
+            Entity e = list.get(i);
+            if (collide(e) && e.getClass() == Creature.class) {
+                e.energy -= res*2;
+                energy += res;
+                break;
+            }
+        }
     }
 
     private Creature copyAction(Creature e) {
@@ -288,4 +331,5 @@ public class Creature extends Entity {
         }
         return e;
     }
+
 }

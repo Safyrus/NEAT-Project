@@ -57,7 +57,7 @@ public class World {
             }
         }
 
-        g.setColor(new Color(255, 0, 0));
+        g.setColor(new Color(0, 0, 0));
         g.drawString(x + " " + y, 20, 10);
         g.drawString("All:" + entities.size(), 20, 30);
         g.drawString("Crea:" + creaCount, 20, 40);
@@ -131,7 +131,7 @@ public class World {
             entities.add(toAdd.get(i));
         }
         toAdd = new ArrayList<>();
-        if (Math.random() < 0.5) {
+        if (Math.random() < 0.5 && entities.size() < (w * h)) {
             for (int i = 0; i < (w * h) / 40000; i++) {
                 Food f = new Food(this);
                 f.setX(Math.random() * w);

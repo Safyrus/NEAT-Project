@@ -40,7 +40,7 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         pause = false;
         camX = 0;
         camY = 0;
-        camSpd = 1;
+        camSpd = 4;
         keys = new boolean[4];
     }
 
@@ -115,6 +115,8 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
             pause = !pause;
         } else if (e.getKeyChar() == 'm') {
             nn.mutate();
+        } else if (e.getKeyChar() == 'c') {
+            nn = nn.copy();
         } else if (e.getKeyCode() == KeyEvent.VK_UP) {
             keys[3] = true;
         } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {

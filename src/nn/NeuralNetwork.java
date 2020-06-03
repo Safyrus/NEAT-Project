@@ -7,6 +7,7 @@ public class NeuralNetwork {
 
     private ArrayList<ArrayList<Neuron>> network;
     private double mutChance;
+    private static boolean print = false;
 
     public NeuralNetwork() {
         mutChance = Math.random();
@@ -32,17 +33,19 @@ public class NeuralNetwork {
     }
 
     public void mutate() {
-        System.out.print(".");
+        if (print)
+            System.out.print(".");
         if (mutChance >= Math.random()) {
             double mutType = Math.random();
-            System.out.println("Mutate !(" + mutType + ")");
+            if (print)
+                System.out.println("Mutate !(" + mutType + ")");
             if (mutType < 0.35) {
                 // add connection
                 mutAddLink();
-            } else if (mutType < 0.36) {
+            } else if (mutType < 0.39) {
                 // add an input neurone
                 mutAddInputNeuron();
-            } else if (mutType < 0.37) {
+            } else if (mutType < 0.43) {
                 // add an output neurone
                 mutAddOutputNeuron();
             } else if (mutType < 0.54) {
@@ -56,6 +59,10 @@ public class NeuralNetwork {
                 mutChangeWeight();
             }
         }
+    }
+
+    public void setPrint(boolean p) {
+        print = p;
     }
 
     public Neuron getInputNeuron(int i) {
@@ -91,15 +98,22 @@ public class NeuralNetwork {
 
         for (int i = 0; i < network.size(); i++) {
             newNn.network.add(new ArrayList<>());
+            // System.out.println("###Layer " + i);
             for (int j = 0; j < network.get(i).size(); j++) {
+                // System.out.println("##neurone " + j);
                 newNn.network.get(i).add(new Neuron());
-                if (i > 0) {
-                    Neuron nOld = network.get(i).get(j);
-                    Neuron nNew = newNn.network.get(i).get(j);
-                    for (int k = 0; k < nOld.getLinkNumber(); k++) {
-                        int index = network.get(i - 1).indexOf(nOld.getNeuron(k));
+                Neuron nOld = network.get(i).get(j);
+                Neuron nNew = newNn.network.get(i).get(j);
+                for (int k = 0; k < nOld.getLinkNumber(); k++) {
+                    // System.out.println("#link " + k + " total " + nOld.getLinkNumber());
+                    int index = -1;
+                    for (int l = 0; l < i; l++) {
+                        // System.out.println("search...");
+                        index = network.get(l).indexOf(nOld.getNeuron(k));
                         if (index != -1) {
-                            nNew.addConnection(newNn.network.get(i - 1).get(index), nOld.getWeight(k));
+                            nNew.addConnection(newNn.network.get(l).get(index), nOld.getWeight(k));
+                            // System.out.println("find at " + l + " " + index);
+                            break;
                         }
                     }
                 }
@@ -146,9 +160,11 @@ public class NeuralNetwork {
     }
 
     private void mutAddLayerNeuron() {
-        System.out.print("add free neuron...");
+        if (print)
+            System.out.print("add free neuron...");
         if (network.size() <= 2) {
-            System.out.print("nope, change to add neuron");
+            if (print)
+                System.out.print("nope, change to add neuron");
             mutAddNeuron();
             return;
         }
@@ -170,11 +186,13 @@ public class NeuralNetwork {
         Neuron n3 = network.get(ranLayer3).get(ranNeuron3);
         n.addConnection(n2, Math.random());
         n3.addConnection(n, Math.random());
-        System.out.println("yes !");
+        if (print)
+            System.out.println("yes !");
     }
 
     private void mutAddInputNeuron() {
-        System.out.print("add input neuron...");
+        if (print)
+            System.out.print("add input neuron...");
         ArrayList<Neuron> l = network.get(0);
         Neuron nIn = new Neuron();
         l.add(nIn);
@@ -196,14 +214,16 @@ public class NeuralNetwork {
             if (!alreadyLink) {
                 n.addConnection(nIn, Math.random());
                 done = true;
-                System.out.println("yes !");
+                if (print)
+                    System.out.println("yes !");
             }
             ite++;
         }
     }
 
     private void mutAddOutputNeuron() {
-        System.out.print("add output neuron...");
+        if (print)
+            System.out.print("add output neuron...");
         ArrayList<Neuron> l = network.get(network.size() - 1);
         Neuron nOut = new Neuron();
         l.add(nOut);
@@ -212,21 +232,25 @@ public class NeuralNetwork {
         int ranNeuron = (int) (Math.random() * network.get(ranLayer).size());
         Neuron n = network.get(ranLayer).get(ranNeuron);
         nOut.addConnection(n, Math.random());
-        System.out.println("yes !");
+        if (print)
+            System.out.println("yes !");
     }
 
     private void mutChangeWeight() {
-        System.out.print("mutate weight...");
+        if (print)
+            System.out.print("mutate weight...");
         int ranLayer = (int) (Math.random() * network.size());
         int ranNeuron = (int) (Math.random() * network.get(ranLayer).size());
         int ranLink = (int) (Math.random() * network.get(ranLayer).get(ranNeuron).getLinkNumber());
         double ranWeight = (Math.random() - 0.5) + network.get(ranLayer).get(ranNeuron).getWeight(ranLink);
-        System.out.println(ranWeight);
+        if (print)
+            System.out.println(ranWeight);
         network.get(ranLayer).get(ranNeuron).setWeight(ranLink, ranWeight);
     }
 
     private void mutAddLink() {
-        System.out.print("add link...");
+        if (print)
+            System.out.print("add link...");
         boolean done = false;
         int ite = 0;
         while (!done && ite < 50) {
@@ -251,17 +275,19 @@ public class NeuralNetwork {
                     ranNeuron = (int) (Math.random() * possible.size());
                     n.addConnection(possible.get(ranNeuron), Math.random());
                     done = true;
-                    System.out.println("yes !");
+                    if (print)
+                        System.out.println("yes !");
                 }
             }
             ite++;
         }
-        if (!done)
+        if (!done && print)
             System.out.println("nope !");
     }
 
     private void mutAddNeuron() {
-        System.out.print("add neuron...");
+        if (print)
+            System.out.print("add neuron...");
         boolean done = false;
         int ite = 0;
         while (!done && ite < 50) {
@@ -285,11 +311,12 @@ public class NeuralNetwork {
                     network.get(ranLayer - 1).add(newOne);
                 }
                 done = true;
-                System.out.println("yes !");
+                if (print)
+                    System.out.println("yes !");
             }
             ite++;
         }
-        if (!done)
+        if (!done && print)
             System.out.println("nope !");
     }
 
