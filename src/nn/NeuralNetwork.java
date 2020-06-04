@@ -39,21 +39,24 @@ public class NeuralNetwork {
             double mutType = Math.random();
             if (print)
                 System.out.println("Mutate !(" + mutType + ")");
-            if (mutType < 0.35) {
+            if (mutType < 0.3) {
                 // add connection
                 mutAddLink();
-            } else if (mutType < 0.39) {
+            } else if (mutType < 0.34) {
                 // add an input neurone
                 mutAddInputNeuron();
-            } else if (mutType < 0.43) {
+            } else if (mutType < 0.38) {
                 // add an output neurone
                 mutAddOutputNeuron();
-            } else if (mutType < 0.54) {
+            } else if (mutType < 0.48) {
                 // add neuron at a layer
                 mutAddLayerNeuron();
-            } else if (mutType < 0.6) {
+            } else if (mutType < 0.58) {
                 // add neuron at a existing connection
                 mutAddNeuron();
+            } else if (mutType < 0.65) {
+                // add neuron at a existing connection
+                mutRemoveNeuron();
             } else if (mutType < 1) {
                 // change weight of a connection
                 mutChangeWeight();
@@ -318,6 +321,26 @@ public class NeuralNetwork {
         }
         if (!done && print)
             System.out.println("nope !");
+    }
+
+    private void mutRemoveNeuron() {
+        if (print)
+            System.out.println("remove neuron");
+        int ranLayer = (int) (Math.random() * (network.size()));
+        ArrayList<Neuron> l = network.get(ranLayer);
+        int ranNeuron = (int) (Math.random() * network.get(ranLayer).size());
+        Neuron n = l.get(ranNeuron);
+
+        for (int i = ranLayer; i < network.size(); i++) {
+            for (int j = 0; j < network.get(i).size(); j++) {
+                Neuron nc = network.get(i).get(j);
+                nc.removeConnection(n);
+            }
+        }
+        network.get(ranLayer).remove(n);
+        if(network.get(ranLayer).size() == 0) {
+            network.remove(network.indexOf(network.get(ranLayer)));
+        }
     }
 
     private int getNeuronLayer(Neuron n) {

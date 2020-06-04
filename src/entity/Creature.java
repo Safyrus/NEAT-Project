@@ -72,18 +72,24 @@ public class Creature extends Entity {
         }
         g.setColor(new Color(red, green, 55));
         g.fillOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
-        g.setColor(new Color(0, 0, 0));
+        if(outputAction.contains(ACT_OUT_ATK)) {
+            g.setColor(new Color(255, 0, 0));
+        }else {
+            g.setColor(new Color(0, 0, 0));
+        }
         g.drawOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
         g.drawLine((int) x, (int) y, (int) (x + (Math.cos(Math.toRadians(angle)) * size / 2)),
                 (int) (y + (Math.sin(Math.toRadians(angle)) * size / 2)));
 
-        double angleMin = angle - 20;
-        double angleMax = angle + 20;
-        g.setColor(new Color(100, 100, 200));
-        g.drawLine((int) x, (int) y, (int) (x + (Math.cos(Math.toRadians(angleMin)) * size * 3)),
-                (int) (y + (Math.sin(Math.toRadians(angleMin)) * size * 3)));
-        g.drawLine((int) x, (int) y, (int) (x + (Math.cos(Math.toRadians(angleMax)) * size * 3)),
-                (int) (y + (Math.sin(Math.toRadians(angleMax)) * size * 3)));
+        if (inputAction.contains(ACT_IN_SEE)) {
+            double angleMin = angle - 20;
+            double angleMax = angle + 20;
+            g.setColor(new Color(100, 100, 200));
+            g.drawLine((int) x, (int) y, (int) (x + (Math.cos(Math.toRadians(angleMin)) * size * 3)),
+                    (int) (y + (Math.sin(Math.toRadians(angleMin)) * size * 3)));
+            g.drawLine((int) x, (int) y, (int) (x + (Math.cos(Math.toRadians(angleMax)) * size * 3)),
+                    (int) (y + (Math.sin(Math.toRadians(angleMax)) * size * 3)));
+        }
 
         x = tmpX;
         y = tmpY;
@@ -104,7 +110,7 @@ public class Creature extends Entity {
             g.drawString("" + inputAction.get(i), 5, 20 + i * 10);
         }
         for (int i = 0; i < outputAction.size(); i++) {
-            g.drawString("" + outputAction.get(i), 15, 20 + i * 10);
+            g.drawString("" + outputAction.get(i), 20, 20 + i * 10);
         }
         g.drawString("" + String.format("%.3f", energy), 30, 10);
         g.drawString("" + birthWait, 30, 22);
@@ -267,6 +273,7 @@ public class Creature extends Entity {
 
     private double act_in_see() {
         double res = 0;
+        energy -= 0.005;
 
         ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
 
@@ -353,7 +360,7 @@ public class Creature extends Entity {
     private Creature copyAction(Creature e) {
         e.inputAction = new ArrayList<>();
         for (int i = 0; i < e.nn.getInputSize(); i++) {
-            if (i < inputAction.size()) {
+            if (i < inputAction.size() && Math.random() > 0.02) {
                 e.inputAction.add(inputAction.get(i));
             } else {
                 e.inputAction.add(randomActIn());
@@ -361,7 +368,7 @@ public class Creature extends Entity {
         }
         e.outputAction = new ArrayList<>();
         for (int i = 0; i < e.nn.getOutputSize(); i++) {
-            if (i < outputAction.size()) {
+            if (i < outputAction.size() && Math.random() > 0.02) {
                 e.outputAction.add(outputAction.get(i));
             } else {
                 e.outputAction.add(randomActOut());

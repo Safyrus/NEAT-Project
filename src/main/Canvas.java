@@ -58,7 +58,7 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
             crea.displayHighlight(g, (int)(-camX), (int)(-camY));
             crea.displayNN(g);
         }
-        nn.display(g, 400, 0);
+        nn.display(g, getWidth()-(nn.getLayerSize()*40)-20, 0);
         keysAction();
     }
 
