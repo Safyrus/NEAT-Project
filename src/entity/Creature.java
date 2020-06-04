@@ -64,7 +64,6 @@ public class Creature extends Entity {
 
         int red = 55;
         int green = 55;
-        // System.out.println(""+red+" "+green);
         if (foodType < 0.5) {
             red = (int) ((0.5 - foodType) * 400);
         }
@@ -75,8 +74,16 @@ public class Creature extends Entity {
         g.fillOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
         g.setColor(new Color(0, 0, 0));
         g.drawOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
-        g.drawLine((int) x, (int) y, (int) (x + (Math.cos(angle) * size / 2)),
-                (int) (y + (Math.sin(angle) * size / 2)));
+        g.drawLine((int) x, (int) y, (int) (x + (Math.cos(Math.toRadians(angle)) * size / 2)),
+                (int) (y + (Math.sin(Math.toRadians(angle)) * size / 2)));
+
+        double angleMin = angle - 20;
+        double angleMax = angle + 20;
+        g.setColor(new Color(100, 100, 200));
+        g.drawLine((int) x, (int) y, (int) (x + (Math.cos(Math.toRadians(angleMin)) * size * 3)),
+                (int) (y + (Math.sin(Math.toRadians(angleMin)) * size * 3)));
+        g.drawLine((int) x, (int) y, (int) (x + (Math.cos(Math.toRadians(angleMax)) * size * 3)),
+                (int) (y + (Math.sin(Math.toRadians(angleMax)) * size * 3)));
 
         x = tmpX;
         y = tmpY;
@@ -161,6 +168,8 @@ public class Creature extends Entity {
                 return act_in_collide(Meat.class);
             case ACT_IN_ENERGY:
                 return act_in_energy();
+            case ACT_IN_SEE:
+                return act_in_see();
             default:
                 return 0;
         }
@@ -187,7 +196,7 @@ public class Creature extends Entity {
     }
 
     private int randomActIn() {
-        int ran = (int) (Math.random() * 7);
+        int ran = (int) (Math.random() * 8);
         switch (ran) {
             case 0:
                 return ACT_IN_CST;
@@ -203,6 +212,8 @@ public class Creature extends Entity {
                 return ACT_IN_COLLIDE_FOOD;
             case 6:
                 return ACT_IN_COLLIDE_CREA;
+            case 7:
+                return ACT_IN_SEE;
             default:
                 return ACT_NOP;
         }
@@ -254,10 +265,35 @@ public class Creature extends Entity {
         return 0;
     }
 
+    private double act_in_see() {
+        double res = 0;
+
+        ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
+
+        for (int i = 0; i < list.size(); i++) {
+            Entity e = list.get(i);
+            double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
+            boolean collide = dist < ((size * 3)) + (e.size / 2);
+            if (e != this && collide) {
+                double eAngle = Math.toDegrees(Math.atan2(e.y - y, e.x - x));
+                if (eAngle < 0)
+                    eAngle += 360;
+                double angleMin = angle - 20;
+                double angleMax = angle + 20;
+                if (eAngle <= angleMax && eAngle >= angleMin) {
+                    res = 1;
+                    break;
+                }
+            }
+        }
+
+        return res;
+    }
+
     private void act_out_forward(double res) {
         energy -= 0.02 * Math.abs(res);
-        x += Math.cos(angle) * res * (10 / size);
-        y += Math.sin(angle) * res * (10 / size);
+        x += Math.cos(Math.toRadians(angle)) * res * (10 / size);
+        y += Math.sin(Math.toRadians(angle)) * res * (10 / size);
     }
 
     private void act_out_rotate(double res) {
@@ -285,6 +321,8 @@ public class Creature extends Entity {
         e.y = y;
         e.size = size + (Math.random() * 2 - 1);
         e.foodType = foodType + (Math.random() * 0.02 - 0.01);
+        e.foodType = Math.max(Math.min(e.foodType, 1), 0);
+        e.energyMax = size * 20;
         e = copyAction(e);
         birthWait = 100;
         if (energy < 100) {
@@ -305,7 +343,7 @@ public class Creature extends Entity {
         for (int i = 0; i < list.size(); i++) {
             Entity e = list.get(i);
             if (collide(e) && e.getClass() == Creature.class) {
-                e.energy -= res*2;
+                e.energy -= res * 2;
                 energy += res;
                 break;
             }

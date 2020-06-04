@@ -57,7 +57,7 @@ public class World {
             }
         }
 
-        g.setColor(new Color(0, 0, 0));
+        g.setColor(new Color(120, 0, 0));
         g.drawString(x + " " + y, 20, 10);
         g.drawString("All:" + entities.size(), 20, 30);
         g.drawString("Crea:" + creaCount, 20, 40);
