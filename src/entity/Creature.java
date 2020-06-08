@@ -12,6 +12,8 @@ public class Creature extends Entity {
     private NeuralNetwork nn;
     private ArrayList<Integer> inputAction;
     private ArrayList<Integer> outputAction;
+    private ArrayList<Entity> entityLocal;
+    private Entity grab;
     private double birthWait;
     private double age;
     private double energyMax;
@@ -31,8 +33,8 @@ public class Creature extends Entity {
     private static final int ACT_IN_COLLIDE_CREA = 11;
     private static final int ACT_IN_SEE = 12;
     private static final int ACT_OUT_ATK = 13;
-    private static final int ACT_OUT_TAKE = 14;
-    private static final int ACT_OUT_BE_RELEASE = 15;
+    private static final int ACT_OUT_GRAB = 14;
+    private static final int ACT_OUT_UNGRAB = 15;
 
     public Creature(World world) {
         super(world);
@@ -43,6 +45,7 @@ public class Creature extends Entity {
         age = 0;
         energyMax = size * 20;
         foodType = 0.8;
+        grab = null;
 
         nn = new NeuralNetwork();
         inputAction = new ArrayList<>();
@@ -72,9 +75,13 @@ public class Creature extends Entity {
         }
         g.setColor(new Color(red, green, 55));
         g.fillOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
-        if(outputAction.contains(ACT_OUT_ATK)) {
+        if (outputAction.contains(ACT_OUT_ATK)) {
             g.setColor(new Color(255, 0, 0));
-        }else {
+        } else if (outputAction.contains(ACT_OUT_GRAB)) {
+            g.setColor(new Color(0, 0, 255));
+        } else if (outputAction.contains(ACT_OUT_UNGRAB)) {
+            g.setColor(new Color(0, 255, 255));
+        } else {
             g.setColor(new Color(0, 0, 0));
         }
         g.drawOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
@@ -120,6 +127,7 @@ public class Creature extends Entity {
 
     @Override
     public void step() {
+        entityLocal = world.getLocalEntity((int) x, (int) y);
         for (int i = 0; i < inputAction.size(); i++) {
             int a = inputAction.get(i);
             nn.getInputNeuron(i).setRes(actionIn(a));
@@ -136,6 +144,11 @@ public class Creature extends Entity {
         age += 0.0001;
         if (energy > energyMax)
             energy = energyMax;
+
+        if (grab != null) {
+            grab.x = x + (size * Math.cos(Math.toRadians(angle)));
+            grab.y = y + (size * Math.sin(Math.toRadians(angle)));
+        }
     }
 
     private void eat(ArrayList<Entity> list) {
@@ -198,6 +211,12 @@ public class Creature extends Entity {
             case ACT_OUT_ATK:
                 act_out_atk(res);
                 break;
+            case ACT_OUT_GRAB:
+                act_out_grab(res);
+                break;
+            case ACT_OUT_UNGRAB:
+                act_out_ungrab(res);
+                break;
         }
     }
 
@@ -226,7 +245,7 @@ public class Creature extends Entity {
     }
 
     private int randomActOut() {
-        int ran = (int) (Math.random() * 5);
+        int ran = (int) (Math.random() * 7);
         switch (ran) {
             case 0:
                 return ACT_OUT_FORWARD;
@@ -238,6 +257,10 @@ public class Creature extends Entity {
                 return ACT_OUT_EAT;
             case 4:
                 return ACT_OUT_ATK;
+            case 5:
+                return ACT_OUT_GRAB;
+            case 6:
+                return ACT_OUT_UNGRAB;
             default:
                 return ACT_NOP;
         }
@@ -260,10 +283,8 @@ public class Creature extends Entity {
 
     private double act_in_collide(Class c) {
         energy -= 0.005;
-        ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
-
-        for (int i = 0; i < list.size(); i++) {
-            Entity e = list.get(i);
+        for (int i = 0; i < entityLocal.size(); i++) {
+            Entity e = entityLocal.get(i);
             if (e != this && (c == e.getClass() || c == null) && collide(e)) {
                 return 1;
             }
@@ -275,10 +296,8 @@ public class Creature extends Entity {
         double res = 0;
         energy -= 0.005;
 
-        ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
-
-        for (int i = 0; i < list.size(); i++) {
-            Entity e = list.get(i);
+        for (int i = 0; i < entityLocal.size(); i++) {
+            Entity e = entityLocal.get(i);
             double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
             boolean collide = dist < ((size * 3)) + (e.size / 2);
             if (e != this && collide) {
@@ -313,8 +332,7 @@ public class Creature extends Entity {
             return;
         }
         energy -= 0.1 * res;
-        ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
-        eat(list);
+        eat(entityLocal);
     }
 
     private void act_out_birth(double res) {
@@ -346,13 +364,44 @@ public class Creature extends Entity {
             return;
         }
         energy -= 0.2 * res;
-        ArrayList<Entity> list = world.getLocalEntity((int) x, (int) y);
-        for (int i = 0; i < list.size(); i++) {
-            Entity e = list.get(i);
+        for (int i = 0; i < entityLocal.size(); i++) {
+            Entity e = entityLocal.get(i);
             if (collide(e) && e.getClass() == Creature.class) {
                 e.energy -= res * 2;
                 energy += res;
                 break;
+            }
+        }
+    }
+
+    private void act_out_grab(double res) {
+        if (res < 1) {
+            grab = null;
+            return;
+        }
+        energy -= 0.01;
+        if (grab == null) {
+            for (int i = 0; i < entityLocal.size(); i++) {
+                Entity e = entityLocal.get(i);
+                if (e != this && collide(e)) {
+                    grab = e;
+                    break;
+                }
+            }
+        }
+    }
+
+    private void act_out_ungrab(double res) {
+        if (res < 1) {
+            return;
+        }
+        energy -= 0.02;
+        for (int i = 0; i < entityLocal.size(); i++) {
+            if(entityLocal.get(i).getClass() == Creature.class) {
+                Creature c = (Creature) entityLocal.get(i);
+                if(c.grab == this) {
+                    c.grab = null;
+                }
             }
         }
     }
