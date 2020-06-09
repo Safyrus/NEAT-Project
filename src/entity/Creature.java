@@ -151,22 +151,16 @@ public class Creature extends Entity {
         }
     }
 
-    private void eat(ArrayList<Entity> list) {
-        for (int i = 0; i < list.size(); i++) {
-            Entity e = list.get(i);
-            if (e.getClass() == Food.class && foodType > 0.25) {
-                double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
-                if (dist < (size / 2) + (e.size / 2)) {
-                    energy += e.getEnergy() * foodType;
-                    e.setEnergy(0);
-                }
-            }
-            if (e.getClass() == Meat.class && foodType < 0.75) {
-                double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
-                if (dist < (size / 2) + (e.size / 2)) {
-                    energy += e.getEnergy() * (1 - foodType);
-                    e.setEnergy(0);
-                }
+    private void eat(Entity e) {
+        double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
+        if (dist < (size / 2) + (e.size / 2)) {
+            double maxEatEnergy = energyMax - energy;
+            if (maxEatEnergy < e.getEnergy()) {
+                energy += maxEatEnergy * foodType;
+                e.setEnergy(e.getEnergy() - maxEatEnergy);
+            } else {
+                energy += e.getEnergy() * foodType;
+                e.setEnergy(0);
             }
         }
     }
@@ -332,7 +326,14 @@ public class Creature extends Entity {
             return;
         }
         energy -= 0.1 * res;
-        eat(entityLocal);
+        for (int i = 0; i < entityLocal.size(); i++) {
+            Entity e = entityLocal.get(i);
+            if (e.getClass() == Food.class && foodType > 0.25) {
+                eat(e);
+            } else if (e.getClass() == Meat.class && foodType < 0.75) {
+                eat(e);
+            }
+        }
     }
 
     private void act_out_birth(double res) {
@@ -397,9 +398,9 @@ public class Creature extends Entity {
         }
         energy -= 0.02;
         for (int i = 0; i < entityLocal.size(); i++) {
-            if(entityLocal.get(i).getClass() == Creature.class) {
+            if (entityLocal.get(i).getClass() == Creature.class) {
                 Creature c = (Creature) entityLocal.get(i);
-                if(c.grab == this) {
+                if (c.grab == this) {
                     c.grab = null;
                 }
             }

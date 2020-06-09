@@ -83,7 +83,7 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        Entity entity = world.MouseGetEntity(e.getX()+(int)(camX), e.getY()+(int)(camY));
+        Entity entity = world.GetEntity(e.getX()+(int)(camX), e.getY()+(int)(camY));
         if (entity != null) {
             if (entity.getClass() == Creature.class) {
                 crea = (Creature) entity;

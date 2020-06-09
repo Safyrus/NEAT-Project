@@ -5,13 +5,27 @@ import java.awt.Graphics;
 
 import world.World;
 
+/**
+ * Class that represente Meat
+ */
 public class Meat extends Entity {
 
+    /**
+     * Default constructor
+     * 
+     * @param world the world in which the entity is in
+     */
     public Meat(World world) {
         super(world);
         energy = Math.random()*9 + 1;
     }
-
+    /**
+     * Display the Meat
+     * 
+     * @param g
+     * @param offx the x coordinate offset
+     * @param offy the x coordinate offset
+     */
     @Override
     public void display(Graphics g, int offx, int offy) {
         double tmpX = x;
@@ -28,6 +42,9 @@ public class Meat extends Entity {
         y = tmpY;
     }
 
+    /**
+     * Action made by the Meat
+     */
     @Override
     public void step() {
         energy -= 0.01;

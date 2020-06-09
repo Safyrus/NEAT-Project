@@ -5,13 +5,29 @@ import java.awt.Graphics;
 
 import world.World;
 
+/**
+ * Class that represente Food
+ */
 public class Food extends Entity {
 
+    /**
+     * Default constructor
+     * 
+     * @param world the world in which the entity is in
+     */
     public Food(World world) {
         super(world);
-        energy = Math.random()*9 + 1;
+        energy = Math.random()*19 + 1;
     }
 
+    
+    /**
+     * Display the Food
+     * 
+     * @param g
+     * @param offx the x coordinate offset
+     * @param offy the x coordinate offset
+     */
     @Override
     public void display(Graphics g, int offx, int offy) {
         double tmpX = x;
@@ -19,7 +35,8 @@ public class Food extends Entity {
         x += offx;
         y += offy;
 
-        g.setColor(new Color(0, (int)(150 + 10*energy), 0));
+        int green = (energy > 10)?255:(int)(150 + 10*energy);
+        g.setColor(new Color(0, green, 0));
         size = (int)(5+energy);
         g.fillOval((int)(x-size/2), (int)(y-size/2), (int)size, (int)size);
 
@@ -27,9 +44,12 @@ public class Food extends Entity {
         y = tmpY;
     }
 
+    /**
+     * Action made by the Food
+     */
     @Override
     public void step() {
-
+        energy -= 0.01;
     }
     
 }
