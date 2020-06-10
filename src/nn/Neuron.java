@@ -6,15 +6,36 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.BasicStroke;
 
+/**
+ * Class that represents a neuron
+ */
 public class Neuron {
 
+    /**
+     * The result or output signal
+     */
     private double res;
+    /**
+     * Other connected neurons
+     */
     private ArrayList<Neuron> inputs_n;
+    /**
+     * the weight of the connections
+     */
     private ArrayList<Double> inputs_w;
 
+    /**
+     * x-position for display
+     */
     private int x;
+    /**
+     * y-position for display
+     */
     private int y;
 
+    /**
+     * Default constructor
+     */
     public Neuron() {
         inputs_n = new ArrayList<>();
         inputs_w = new ArrayList<>();
@@ -23,51 +44,99 @@ public class Neuron {
         y = 0;
     }
 
+    /**
+     * Gets the result
+     * @return res
+     */
     public double getRes() {
         return res;
     }
 
+    /**
+     * Sets the result
+     * @param res
+     */
     public void setRes(double res) {
         this.res = res;
     }
 
+    /**
+     * Gets the x-position
+     * @return x
+     */
     public int getX() {
         return x;
     }
 
+    /**
+     * Sets the x-position
+     * @param x
+     */
     public void setX(int x) {
         this.x = x;
     }
 
+    /**
+     * Gets the y-position
+     * @return y
+     */
     public int getY() {
         return y;
     }
 
+    /**
+     * Sets the y-position
+     * @param y
+     */
     public void setY(int y) {
         this.y = y;
     }
 
+    /**
+     * Gets the number of connections
+     * @return number of connections
+     */
     public int getLinkNumber() {
         return inputs_w.size();
     }
 
+    /**
+     * Gets the weight of a specific connection
+     * @param i connection index
+     * @return connection weight
+     */
     public double getWeight(int i) {
         if (inputs_w.size() > i)
             return inputs_w.get(i);
         return 0;
     }
 
-    public void setWeight(int i, double v) {
+    /**
+     * Sets the weight of a specific connection
+     * @param i connection index
+     * @param w connection weight
+     */
+    public void setWeight(int i, double w) {
         if (inputs_w.size() > i)
-            inputs_w.set(i, v);
+            inputs_w.set(i, w);
     }
 
+    /**
+     * Gets a connected neuron
+     * @param i connection index
+     * @return connected neuron
+     */
     public Neuron getNeuron(int i) {
         if (inputs_n.size() > i)
             return inputs_n.get(i);
         return null;
     }
 
+    /**
+     * Sets a connected neuron
+     * @param i connection index
+     * @param i connection weight
+     */
     public void addConnection(Neuron n, double w) {
         if (inputs_n.contains(n)) {
             inputs_n.set(inputs_n.indexOf(n), n);
@@ -78,6 +147,10 @@ public class Neuron {
         }
     }
 
+    /**
+     * Removes a connected neuron
+     * @param n the neuron to remove
+     */
     public void removeConnection(Neuron n) {
         if (inputs_n.contains(n)) {
             inputs_w.remove(inputs_n.indexOf(n));
@@ -85,6 +158,10 @@ public class Neuron {
         }
     }
 
+    /**
+     * Calculates neuron output
+     * @return the output
+     */
     public double operation() {
         if (!inputs_n.isEmpty()) {
             res = 0;
@@ -96,6 +173,11 @@ public class Neuron {
         return res;
     }
 
+    /**
+     * Calculates an activation function with a given value
+     * @param v value
+     * @param type type of activation function
+     */
     private double activationFunction(double v, int type) {
         double r = 0;
         switch (type) {
@@ -106,10 +188,15 @@ public class Neuron {
         return r;
     }
 
+    /**
+     * Display the neuron
+     * @param g
+     */
     public void display(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         g2.setStroke(new BasicStroke(2));
 
+        //draw all connection with other neurons
         for (int i = 0; i < inputs_n.size(); i++) {
             Neuron n = inputs_n.get(i);
             double w = inputs_w.get(i);
@@ -123,9 +210,9 @@ public class Neuron {
                 g.setColor(new Color(v, 0, 0));
             }
             g2.drawLine(x, y, n.x, n.y);
-            // g.drawString(String.format ("%.4f", inputs_w.get(i)), x - n.x, y - 10);
         }
 
+        //draws the neuron
         int size = 10;
         int value = Math.abs((int) (res * 100));
         if (value > 255) {

@@ -20,7 +20,7 @@ public class Meat extends Entity {
         energy = Math.random()*9 + 1;
     }
     /**
-     * Display the Meat
+     * Displays the Meat
      * 
      * @param g
      * @param offx the x coordinate offset
@@ -43,7 +43,7 @@ public class Meat extends Entity {
     }
 
     /**
-     * Action made by the Meat
+     * Actions made by the Meat
      */
     @Override
     public void step() {

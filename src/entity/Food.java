@@ -22,7 +22,7 @@ public class Food extends Entity {
 
     
     /**
-     * Display the Food
+     * Displays the Food
      * 
      * @param g
      * @param offx the x coordinate offset
@@ -45,7 +45,7 @@ public class Food extends Entity {
     }
 
     /**
-     * Action made by the Food
+     * Actions made by the Food
      */
     @Override
     public void step() {

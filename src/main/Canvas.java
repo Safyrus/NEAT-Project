@@ -12,22 +12,52 @@ import entity.Entity;
 import nn.NeuralNetwork;
 import world.World;
 
+/**
+ * Class where the whole simulation take place
+ */
 public class Canvas extends JPanel implements MouseListener, KeyListener {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Debug neuralNetwork
+     */
     private NeuralNetwork nn;
+    /**
+     * World to simulate
+     */
     private World world;
+    /**
+     * Selected creature
+     */
     private Creature crea;
 
+    /**
+     * if the simulation is pause or not
+     */
     private boolean pause;
+    /**
+     * x-position of the camera
+     */
     private double camX;
+    /**
+     * y-position of the camera
+     */
     private double camY;
+    /**
+     * speed of the camera
+     */
     private double camSpd;
+    /**
+     * keys pressed
+     */
     private boolean keys[];
 
+    /**
+     * Default constructor
+     */
     public Canvas() {
-        this.addMouseListener(this);
-        nn = new NeuralNetwork();
+
+        //creations of the world
         world = new World(800, 800);
         for (int i = 0; i < 10; i++) {
             Creature c = new Creature(world);
@@ -35,8 +65,13 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
             c.setY(Math.random() * world.getH());
             world.addEntity(c);
         }
-        crea = null;
 
+        //creations of the debug neuralnetwork
+        nn = new NeuralNetwork();
+
+        //initializes variables
+        this.addMouseListener(this);
+        crea = null;
         pause = false;
         camX = 0;
         camY = 0;
@@ -44,24 +79,37 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         keys = new boolean[4];
     }
 
+    /**
+     * Calculates one step of the simulation
+     */
     public void step() {
         if (!pause) {
             world.step();
         }
+        keysAction();
     }
 
+    /**
+     * Displays the simulation
+     */
     public void paint(Graphics g) {
         super.paint(g);
 
+        //displays the world
         world.display(g, (int)(-camX), (int)(-camY));
+        //hightlights the selected creature and display his information
         if (crea != null) {
             crea.displayHighlight(g, (int)(-camX), (int)(-camY));
             crea.displayNN(g);
         }
+
+        //displays the neuralNetwork
         nn.display(g, getWidth()-(nn.getLayerSize()*40)-20, 0);
-        keysAction();
     }
 
+    /**
+     * Actions performed by different keys
+     */
     private void keysAction() {
         if (keys[0]) {
             camX += camSpd;

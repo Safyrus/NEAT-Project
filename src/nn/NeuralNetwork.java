@@ -3,15 +3,31 @@ package nn;
 import java.util.ArrayList;
 import java.awt.Graphics;
 
+/**
+ * Class that represente a neural network
+ */
 public class NeuralNetwork {
 
+    /**
+     * array of neurons that constitute the network
+     */
     private ArrayList<ArrayList<Neuron>> network;
+    /**
+     * chance for this network to mutate
+     */
     private double mutChance;
+    /**
+     * prints informations to the console
+     */
     private static boolean print = false;
 
+    /**
+     * Default constructor
+     */
     public NeuralNetwork() {
         mutChance = Math.random();
 
+        //adds 3 neurone to 2 layers of the network
         network = new ArrayList<>();
         ArrayList<Neuron> layer = new ArrayList<>();
         layer.add(new Neuron());
@@ -24,6 +40,7 @@ public class NeuralNetwork {
         layer.add(new Neuron());
         network.add(layer);
 
+        //adds 3 connections
         Neuron n = network.get(0).get(0);
         network.get(1).get(0).addConnection(n, 1);
         n = network.get(0).get(1);
@@ -32,9 +49,14 @@ public class NeuralNetwork {
         network.get(1).get(2).addConnection(n, 0.75);
     }
 
+    /**
+     * Mutates the network
+     */
     public void mutate() {
         if (print)
             System.out.print(".");
+        
+        // if it mutates
         if (mutChance >= Math.random()) {
             double mutType = Math.random();
             if (print)
@@ -64,10 +86,19 @@ public class NeuralNetwork {
         }
     }
 
+    /**
+     * Sets print
+     * @param p boolean
+     */
     public void setPrint(boolean p) {
         print = p;
     }
 
+    /**
+     * Gets an input neuron
+     * @param i index
+     * @return neuron
+     */
     public Neuron getInputNeuron(int i) {
         if (network.get(0).size() > i) {
             return network.get(0).get(i);
@@ -75,14 +106,27 @@ public class NeuralNetwork {
         return null;
     }
 
+    /**
+     * Gets the size of the network
+     * @return size
+     */
     public int getLayerSize() {
         return network.size();
     }
 
+    /**
+     * Gets the size of the input layer
+     * @return size
+     */
     public int getInputSize() {
         return network.get(0).size();
     }
 
+    /**
+     * Gets an output neuron
+     * @param i index
+     * @return neuron
+     */
     public Neuron getOutputNeuron(int i) {
         if (network.get(network.size() - 1).size() > i) {
             return network.get(network.size() - 1).get(i);
@@ -90,42 +134,56 @@ public class NeuralNetwork {
         return null;
     }
 
+    /**
+     * Gets the size of the output layer
+     * @return size
+     */
     public int getOutputSize() {
         return network.get(network.size() - 1).size();
     }
 
+    /**
+     * Makes a copy of the network with a chance to mutate during the process
+     * @return copy of the network
+     */
     public NeuralNetwork copy() {
+        //creates the new network
         NeuralNetwork newNn = new NeuralNetwork();
         newNn.mutChance = this.mutChance + (Math.random() * 0.1 - 0.05);
         newNn.network = new ArrayList<>();
 
+        //copys the neurons and their connection
         for (int i = 0; i < network.size(); i++) {
             newNn.network.add(new ArrayList<>());
-            // System.out.println("###Layer " + i);
             for (int j = 0; j < network.get(i).size(); j++) {
-                // System.out.println("##neurone " + j);
                 newNn.network.get(i).add(new Neuron());
+
+                //adds the connections to a neuron
                 Neuron nOld = network.get(i).get(j);
                 Neuron nNew = newNn.network.get(i).get(j);
                 for (int k = 0; k < nOld.getLinkNumber(); k++) {
-                    // System.out.println("#link " + k + " total " + nOld.getLinkNumber());
                     int index = -1;
                     for (int l = 0; l < i; l++) {
-                        // System.out.println("search...");
+                        //checks if the neuron exists
                         index = network.get(l).indexOf(nOld.getNeuron(k));
                         if (index != -1) {
                             nNew.addConnection(newNn.network.get(l).get(index), nOld.getWeight(k));
-                            // System.out.println("find at " + l + " " + index);
                             break;
                         }
                     }
                 }
             }
         }
+
+        //mutate or not the new network
         newNn.mutate();
+
         return newNn;
     }
 
+    /**
+     * Calculates the state of all neuron
+     */
     public void step() {
         for (int i = network.size() - 1; i >= 1; i--) {
             ArrayList<Neuron> layer = network.get(i);
@@ -136,7 +194,15 @@ public class NeuralNetwork {
         }
     }
 
+    /**
+     * Displays the neural network
+     * @param g
+     * @param x x-position
+     * @param y y-position
+     */
     public void display(Graphics g, int x, int y) {
+
+        //sets the position of all neurons
         for (int i = 0; i < network.size(); i++) {
             ArrayList<Neuron> layer = network.get(i);
             for (int j = 0; j < layer.size(); j++) {
@@ -145,6 +211,8 @@ public class NeuralNetwork {
                 n.setY(y + j * 40 + 40);
             }
         }
+
+        //displays all neurons
         for (int i = network.size() - 1; i >= 0; i--) {
             ArrayList<Neuron> layer = network.get(i);
             for (int j = 0; j < layer.size(); j++) {
@@ -154,6 +222,10 @@ public class NeuralNetwork {
         }
     }
 
+    /**
+     * Gets the number of neurons in the network
+     * @return number of neurons
+     */
     public int neuronCount() {
         int res = 0;
         for (int i = 0; i < network.size(); i++) {
@@ -162,6 +234,9 @@ public class NeuralNetwork {
         return res;
     }
 
+    /**
+     * Mutation that adds a neuron to a new layer
+     */
     private void mutAddLayerNeuron() {
         if (print)
             System.out.print("add free neuron...");
@@ -193,6 +268,9 @@ public class NeuralNetwork {
             System.out.println("yes !");
     }
 
+    /**
+     * Mutation that adds an input neuron
+     */
     private void mutAddInputNeuron() {
         if (print)
             System.out.print("add input neuron...");
@@ -224,6 +302,9 @@ public class NeuralNetwork {
         }
     }
 
+    /**
+     * Mutation that adds an output neuron
+     */
     private void mutAddOutputNeuron() {
         if (print)
             System.out.print("add output neuron...");
@@ -239,6 +320,9 @@ public class NeuralNetwork {
             System.out.println("yes !");
     }
 
+    /**
+     * Mutation that changes the weight of a connection
+     */
     private void mutChangeWeight() {
         if (print)
             System.out.print("mutate weight...");
@@ -251,6 +335,9 @@ public class NeuralNetwork {
         network.get(ranLayer).get(ranNeuron).setWeight(ranLink, ranWeight);
     }
 
+    /**
+     * Mutation that adds a new connection
+     */
     private void mutAddLink() {
         if (print)
             System.out.print("add link...");
@@ -288,6 +375,9 @@ public class NeuralNetwork {
             System.out.println("nope !");
     }
 
+    /**
+     * Mutation that adds a neuron to a connection
+     */
     private void mutAddNeuron() {
         if (print)
             System.out.print("add neuron...");
@@ -323,6 +413,9 @@ public class NeuralNetwork {
             System.out.println("nope !");
     }
 
+    /**
+     * Mutation that remove a neuron
+     */
     private void mutRemoveNeuron() {
         if (print)
             System.out.println("remove neuron");
@@ -343,6 +436,11 @@ public class NeuralNetwork {
         }
     }
 
+    /**
+     * Gets the layer index of a neuron
+     * @param n neuron
+     * @return index
+     */
     private int getNeuronLayer(Neuron n) {
         for (int i = 0; i < network.size(); i++) {
             for (int j = 0; j < network.get(i).size(); j++) {

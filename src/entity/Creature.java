@@ -7,18 +7,49 @@ import java.util.ArrayList;
 import nn.NeuralNetwork;
 import world.World;
 
+/**
+ * Class that represents a creature
+ */
 public class Creature extends Entity {
 
+    /**
+     * The neural network of the creature
+     */
     private NeuralNetwork nn;
+    /**
+     * actions that send data to the input layer of the neural network
+     */
     private ArrayList<Integer> inputAction;
+    /**
+     * actions that recieve data from the output layer of the neural network
+     */
     private ArrayList<Integer> outputAction;
+    /**
+     * array of entity nearby
+     */
     private ArrayList<Entity> entityLocal;
+    /**
+     * grabed entity
+     */
     private Entity grab;
+    /**
+     * time before the creature can create another one
+     */
     private double birthWait;
+    /**
+     * the amount of time since that creature has been alive
+     */
     private double age;
+    /**
+     * the maximum energy that this creature can have
+     */
     private double energyMax;
+    /**
+     * the type of food that this creature can eat.
+     */
     private double foodType;
 
+    //all types of actions
     private static final int ACT_NOP = 0;
     private static final int ACT_IN_CST = 1;
     private static final int ACT_IN_CST_NEG = 2;
@@ -36,8 +67,14 @@ public class Creature extends Entity {
     private static final int ACT_OUT_GRAB = 14;
     private static final int ACT_OUT_UNGRAB = 15;
 
+    /**
+     * Default constructor
+     * @param world the world in which the entity is in
+     */
     public Creature(World world) {
         super(world);
+
+        //initializes variables
         energy = 100;
         angle = Math.random() * 360;
         size = Math.random() * 10 + 15;
@@ -47,6 +84,7 @@ public class Creature extends Entity {
         foodType = 0.8;
         grab = null;
 
+        //defines inputs and outputs actions
         nn = new NeuralNetwork();
         inputAction = new ArrayList<>();
         outputAction = new ArrayList<>();
@@ -58,6 +96,13 @@ public class Creature extends Entity {
         outputAction.add(ACT_OUT_BIRTH);
     }
 
+    /**
+     * Displays the Creature
+     * 
+     * @param g
+     * @param offx the x coordinate offset
+     * @param offy the x coordinate offset
+     */
     @Override
     public void display(Graphics g, int offx, int offy) {
         double tmpX = x;
@@ -65,6 +110,7 @@ public class Creature extends Entity {
         x += offx;
         y += offy;
 
+        //sets the color of the creature according to the type of food it eats
         int red = 55;
         int green = 55;
         if (foodType < 0.5) {
@@ -74,6 +120,8 @@ public class Creature extends Entity {
             green = (int) ((foodType - 0.5) * 400);
         }
         g.setColor(new Color(red, green, 55));
+
+        //displays the creature
         g.fillOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
         if (outputAction.contains(ACT_OUT_ATK)) {
             g.setColor(new Color(255, 0, 0));
@@ -84,10 +132,13 @@ public class Creature extends Entity {
         } else {
             g.setColor(new Color(0, 0, 0));
         }
+
+        //displays the creature's orientation
         g.drawOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
         g.drawLine((int) x, (int) y, (int) (x + (Math.cos(Math.toRadians(angle)) * size / 2)),
                 (int) (y + (Math.sin(Math.toRadians(angle)) * size / 2)));
 
+        //displays what the creature sees if it possesses this ability
         if (inputAction.contains(ACT_IN_SEE)) {
             double angleMin = angle - 20;
             double angleMax = angle + 20;
@@ -102,16 +153,31 @@ public class Creature extends Entity {
         y = tmpY;
     }
 
+    /**
+     * Displays the highlighted version of the creature
+     * @param g
+     * @param offx the x coordinate offset
+     * @param offy the x coordinate offset
+     */
     public void displayHighlight(Graphics g, int offx, int offy) {
         g.setColor(new Color(255, 255, 0));
         g.drawOval((int) (x + offx - size / 2), (int) (y + offy - size / 2), (int) size, (int) size);
     }
 
+    /**
+     * Displays the neural network and informations about the creature
+     * @param g
+     */
     public void displayNN(Graphics g) {
+        //displays a rectangle
         g.setColor(new Color(255, 255, 255, 128));
         int rectH = Math.max(nn.getInputSize(), nn.getOutputSize());
         g.fillRect(0, 0, nn.getLayerSize() * 40 + 50, rectH * 40 + 40);
+
+        //displays the neural network
         nn.display(g, 0, 0);
+
+        //displays creature's informations
         g.setColor(new Color(0, 0, 0));
         for (int i = 0; i < inputAction.size(); i++) {
             g.drawString("" + inputAction.get(i), 5, 20 + i * 10);
@@ -125,32 +191,49 @@ public class Creature extends Entity {
         g.drawString("" + String.format("%.2f", foodType), 80, 22);
     }
 
+    /**
+     * Actions made by the Creature
+     */
     @Override
     public void step() {
+        //get nearby entity
         entityLocal = world.getLocalEntity((int) x, (int) y);
+
+        //performes all input actions
         for (int i = 0; i < inputAction.size(); i++) {
             int a = inputAction.get(i);
             nn.getInputNeuron(i).setRes(actionIn(a));
         }
+
+        //calculates the neural network
         nn.step();
+
+        //performes all output actions
         for (int i = 0; i < outputAction.size(); i++) {
             double res = nn.getOutputNeuron(i).getRes();
             actionOut(outputAction.get(i), res);
         }
+
         if (birthWait > 0)
             birthWait--;
 
-        energy -= 0.001 * nn.neuronCount() + age;
         age += 0.0001;
+
+        energy -= 0.001 * nn.neuronCount() + age;
         if (energy > energyMax)
             energy = energyMax;
 
+        //move the entity grabed
         if (grab != null) {
             grab.x = x + (size * Math.cos(Math.toRadians(angle)));
             grab.y = y + (size * Math.sin(Math.toRadians(angle)));
         }
     }
 
+    /**
+     * Eat an entity
+     * @param e entity
+     */
     private void eat(Entity e) {
         double dist = Math.sqrt(Math.pow(e.y - y, 2) + Math.pow(e.x - x, 2));
         if (dist < (size / 2) + (e.size / 2)) {
@@ -165,6 +248,11 @@ public class Creature extends Entity {
         }
     }
 
+    /**
+     * Performs an input action and gets the result
+     * @param a action
+     * @return result
+     */
     private double actionIn(int a) {
         switch (a) {
             case ACT_IN_CST:
@@ -188,6 +276,11 @@ public class Creature extends Entity {
         }
     }
 
+    /**
+     * sends a result to and performs an output action
+     * @param a action
+     * @param res result of the neural network
+     */
     private void actionOut(int a, double res) {
         switch (a) {
             case ACT_OUT_FORWARD:
@@ -214,6 +307,10 @@ public class Creature extends Entity {
         }
     }
 
+    /**
+     * Gets a random input action
+     * @return action
+     */
     private int randomActIn() {
         int ran = (int) (Math.random() * 8);
         switch (ran) {
@@ -238,6 +335,10 @@ public class Creature extends Entity {
         }
     }
 
+    /**
+     * Gets a random output action
+     * @return action
+     */
     private int randomActOut() {
         int ran = (int) (Math.random() * 7);
         switch (ran) {
@@ -260,21 +361,38 @@ public class Creature extends Entity {
         }
     }
 
+    /**
+     * Input action: constant
+     * @return result
+     */
     private double act_in_cst() {
         energy -= 0.001;
         return 1;
     }
 
+    /**
+     * Input action: negative constant
+     * @return result
+     */
     private double act_in_cstNeg() {
         energy -= 0.001;
         return -1;
     }
 
+    /**
+     * Input action: energy level
+     * @return result
+     */
     private double act_in_energy() {
         energy -= 0.001;
         return energy / 100;
     }
 
+    /**
+     * Input action: collision with a type of entity
+     * @param c type of entity
+     * @return result
+     */
     private double act_in_collide(Class c) {
         energy -= 0.005;
         for (int i = 0; i < entityLocal.size(); i++) {
@@ -286,6 +404,10 @@ public class Creature extends Entity {
         return 0;
     }
 
+    /**
+     * Input action: see any entity
+     * @return result
+     */
     private double act_in_see() {
         double res = 0;
         energy -= 0.005;
@@ -310,17 +432,29 @@ public class Creature extends Entity {
         return res;
     }
 
+    /**
+     * Output action: move forward
+     * @param res result of the output neuron
+     */
     private void act_out_forward(double res) {
         energy -= 0.02 * Math.abs(res);
         x += Math.cos(Math.toRadians(angle)) * res * (10 / size);
         y += Math.sin(Math.toRadians(angle)) * res * (10 / size);
     }
 
+    /**
+     * Output action: rotate
+     * @param res result of the output neuron
+     */
     private void act_out_rotate(double res) {
         energy -= 0.02 * Math.abs(res);
         angle += res * (10 / size);
     }
 
+    /**
+     * Output action: eat an entity
+     * @param res result of the output neuron
+     */
     private void act_out_eat(double res) {
         if (res < 1) {
             return;
@@ -336,6 +470,10 @@ public class Creature extends Entity {
         }
     }
 
+    /**
+     * Output action: creates another entity
+     * @param res result of the output neuron
+     */
     private void act_out_birth(double res) {
         energy -= 0.02 * Math.max(res, 0);
         if (res < 1 || birthWait > 0) {
@@ -360,6 +498,10 @@ public class Creature extends Entity {
         world.addEntity(e);
     }
 
+    /**
+     * Output action: attacks another entity
+     * @param res result of the output neuron
+     */
     private void act_out_atk(double res) {
         if (res < 0) {
             return;
@@ -375,6 +517,10 @@ public class Creature extends Entity {
         }
     }
 
+    /**
+     * Output action: grabs another entity
+     * @param res result of the output neuron
+     */
     private void act_out_grab(double res) {
         if (res < 1) {
             grab = null;
@@ -392,6 +538,10 @@ public class Creature extends Entity {
         }
     }
 
+    /**
+     * Output action: releases itself from another entity
+     * @param res result of the output neuron
+     */
     private void act_out_ungrab(double res) {
         if (res < 1) {
             return;
@@ -407,6 +557,11 @@ public class Creature extends Entity {
         }
     }
 
+    /**
+     * changes a creature's action to this creature's actions with a chance to mutate
+     * @param e creature to change
+     * @return changed creature
+     */
     private Creature copyAction(Creature e) {
         e.inputAction = new ArrayList<>();
         for (int i = 0; i < e.nn.getInputSize(); i++) {

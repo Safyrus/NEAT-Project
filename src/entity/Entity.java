@@ -122,7 +122,7 @@ public abstract class Entity {
     }
 
     /**
-     * Display the entity
+     * Displays the entity
      * 
      * @param g
      * @param offx the x coordinate offset
@@ -131,7 +131,7 @@ public abstract class Entity {
     public abstract void display(Graphics g, int offx, int offy);
 
     /**
-     * Action made by the entity
+     * Actions made by the entity
      */
     public abstract void step();
 
