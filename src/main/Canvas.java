@@ -64,29 +64,38 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
      * keys pressed
      */
     private boolean keys[];
-
-    private String strBuf;
+    /**
+     * string buffer for menu options
+     */
+    private String strBuf[];
+    /**
+     * selected option
+     */
     private int selected;
-
+    /**
+     * x-position of the menu
+     */
     private int menuX;
+    /**
+     * y-position of the menu
+     */
     private int menuY;
+    /**
+     * width of the menu
+     */
     private int menuW;
+    /**
+     * height of the menu
+     */
     private int menuH;
+
+    private boolean save;
+    private boolean load;
 
     /**
      * Default constructor
      */
     public Canvas() {
-
-        // creations of the world
-        world = new World(800, 800);
-        for (int i = 0; i < 10; i++) {
-            Creature c = new Creature(world);
-            c.setX(Math.random() * world.getW());
-            c.setY(Math.random() * world.getH());
-            world.addEntity(c);
-        }
-
         // creations of the debug neuralnetwork
         nn = new NeuralNetwork();
 
@@ -95,21 +104,63 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         crea = null;
         menu = false;
         selected = 0;
-        strBuf = "";
+        strBuf = new String[3];
+        strBuf[0] = "";
+        strBuf[1] = "10";
+        strBuf[2] = "worldSave";
         pause = false;
         camX = 0;
         camY = 0;
         camSpd = 4;
         keys = new boolean[4];
+
+        // creations of the world
+        createWorld();
+    }
+
+    /**
+     * Regenerates the world
+     */
+    private void createWorld() {
+        int entityStart = 10;
+        try {
+            entityStart = Integer.parseInt(strBuf[1]);
+        } catch (Exception e) {
+        }
+        
+        world = new World(800, 800);
+        for (int i = 0; i < entityStart; i++) {
+            Creature c = new Creature(world);
+            c.setX(Math.random() * world.getW());
+            c.setY(Math.random() * world.getH());
+            world.addEntity(c);
+        }
     }
 
     /**
      * Calculates one step of the simulation
      */
     public void step() {
+        if (save) {
+            if (strBuf[2] == "") {
+                strBuf[2] = "worldSave";
+            }
+            save(strBuf[2]);
+            save = false;
+        }
+
+        if (load) {
+            if (strBuf[2] == "") {
+                strBuf[2] = "worldSave";
+            }
+            load(strBuf[2]);
+            load = false;
+        }
+
         if (!pause) {
             world.step();
         }
+
         keysAction();
     }
 
@@ -121,39 +172,64 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
 
         // displays the world
         world.display(g, (int) (-camX), (int) (-camY));
+
         // hightlights the selected creature and display his information
         if (crea != null && !menu) {
             crea.displayHighlight(g, (int) (-camX), (int) (-camY));
             crea.displayNN(g);
         }
 
-        // displays the neuralNetwork
-        nn.display(g, getWidth() - (nn.getLayerSize() * 40) - 20, 0);
-
+        // displays the menu
         if (menu) {
+            // changes the font to a bigger one
             Font font = g.getFont();
             Font bigFont = font.deriveFont(font.getSize() * 1.4F);
             g.setFont(bigFont);
+
             int opacity = 160;
             menuX = getWidth() / 4;
             menuY = getHeight() / 4;
             menuW = getWidth() / 2;
             menuH = getHeight() / 2;
 
-            g.setColor(new Color(0, 0, 0, opacity));
+            Color black = new Color(0, 0, 0, opacity);
+            Color white = new Color(255, 255, 255, opacity);
+            Color grey = new Color(200, 200, 200, opacity);
+            Color yellow = new Color(255, 255, 100, opacity);
+            g.setColor(black);
             g.fillRect(menuX, menuY, menuW, menuH);
 
-            g.setColor(new Color(255, 255, 255, opacity));
+            // displays buttons
+            g.setColor(white);
             g.fillRect(menuX + 10, menuY + 10, 60, 30);
             g.fillRect(menuX + 10, menuY + 50, 60, 30);
             g.fillRect(menuX + 10, menuY + 90, 60, 30);
+            if (selected == 1) {
+                g.setColor(yellow);
+            } else {
+                g.setColor(grey);
+            }
+            g.fillRect(menuX + 90, menuY + 90, 40, 30);
+            if (selected == 2) {
+                g.setColor(yellow);
+            } else {
+                g.setColor(grey);
+            }
+            g.fillRect(menuX + 90, menuY + 30, 120, 30);
 
+            // displays texts
             g.setColor(new Color(0, 0, 0, opacity));
             g.drawString("SAVE", menuX + 20, menuY + 30);
             g.drawString("LOAD", menuX + 20, menuY + 70);
             g.drawString("REGEN", menuX + 12, menuY + 110);
+            g.drawString(strBuf[1], menuX + 90, menuY + 110);
+            g.drawString(strBuf[2], menuX + 90, menuY + 50);
 
+            // resets the font
             g.setFont(font);
+        } else {
+            // displays the neuralNetwork
+            nn.display(g, getWidth() - (nn.getLayerSize() * 40) - 20, 0);
         }
     }
 
@@ -175,16 +251,19 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         }
     }
 
+    /**
+     * Saves the world into a file
+     */
     private void save(String file) {
         try {
-            FileOutputStream f = new FileOutputStream(new File(file));
-            ObjectOutputStream o = new ObjectOutputStream(f);
+            File f = new File(file);
+            FileOutputStream fo = new FileOutputStream(f);
+            ObjectOutputStream o = new ObjectOutputStream(fo);
 
             o.writeObject(world);
 
             o.close();
-            f.close();
-
+            fo.close();
         } catch (FileNotFoundException e) {
             System.out.println("File not found");
         } catch (IOException e) {
@@ -192,6 +271,9 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         }
     }
 
+    /**
+     * Loads the world from a file
+     */
     private void load(String file) {
         try {
             FileInputStream fi = new FileInputStream(new File(file));
@@ -201,7 +283,6 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
 
             oi.close();
             fi.close();
-
         } catch (FileNotFoundException e) {
             System.out.println("File not found");
         } catch (IOException e) {
@@ -228,22 +309,21 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
             }
         } else {
             if (e.getX() > menuX + 10 && e.getX() < menuX + 70 && e.getY() > menuY + 10 && e.getY() < menuY + 40) {
-                System.out.println("save");
-                save("worldSave");
+                save = true;
             } else if (e.getX() > menuX + 10 && e.getX() < menuX + 70 && e.getY() > menuY + 50
                     && e.getY() < menuY + 80) {
-                System.out.println("load");
-                load("worldSave");
+                load = true;
             } else if (e.getX() > menuX + 10 && e.getX() < menuX + 70 && e.getY() > menuY + 90
                     && e.getY() < menuY + 120) {
-                System.out.println("regen");
-                world = new World(800, 800);
-                for (int i = 0; i < 10; i++) {
-                    Creature c = new Creature(world);
-                    c.setX(Math.random() * world.getW());
-                    c.setY(Math.random() * world.getH());
-                    world.addEntity(c);
-                }
+                createWorld();
+            } else if (e.getX() > menuX + 90 && e.getX() < menuX + 130 && e.getY() > menuY + 90
+                    && e.getY() < menuY + 120) {
+                selected = 1;
+            } else if (e.getX() > menuX + 90 && e.getX() < menuX + 210 && e.getY() > menuY + 30
+                    && e.getY() < menuY + 60) {
+                selected = 2;
+            } else {
+                selected = 0;
             }
         }
     }
@@ -266,38 +346,58 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyChar() == 'p') {
-            pause = !pause;
-        } else if (e.getKeyChar() == 'm') {
-            nn.mutate();
-        } else if (e.getKeyChar() == 'c') {
-            nn = nn.copy();
-        } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+        char key = e.getKeyChar();
+        int keyCode = e.getKeyCode();
+
+        if (selected == 0) {
+            if (key == 'p') {
+                pause = !pause;
+            } else if (key == 'm') {
+                nn.mutate();
+            } else if (key == 'c') {
+                nn = nn.copy();
+            } else if (key == '+') {
+                camSpd *= 2;
+            } else if (key == '-') {
+                camSpd /= 2;
+            }
+        } else {
+            if (keyCode == KeyEvent.VK_BACK_SPACE) {
+                if (strBuf[selected].length() > 0) {
+                    strBuf[selected] = strBuf[selected].substring(0, strBuf[selected].length() - 1);
+                }
+            } else if (keyCode > 0x1F && keyCode < 0x7F || keyCode > 0x9F) {
+                strBuf[selected] += key;
+            }
+        }
+        if (!menu) {
+            if (keyCode == KeyEvent.VK_UP) {
+                keys[3] = true;
+            } else if (keyCode == KeyEvent.VK_DOWN) {
+                keys[2] = true;
+            } else if (keyCode == KeyEvent.VK_LEFT) {
+                keys[1] = true;
+            } else if (keyCode == KeyEvent.VK_RIGHT) {
+                keys[0] = true;
+            }
+        }
+        if (keyCode == KeyEvent.VK_ESCAPE) {
             menu = !menu;
-        } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-            keys[3] = true;
-        } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            keys[2] = true;
-        } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            keys[1] = true;
-        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            keys[0] = true;
-        } else if (e.getKeyChar() == '+') {
-            camSpd *= 2;
-        } else if (e.getKeyChar() == '-') {
-            camSpd /= 2;
+            selected = 0;
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
+        int keyCode = e.getKeyCode();
+
+        if (keyCode == KeyEvent.VK_UP) {
             keys[3] = false;
-        } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+        } else if (keyCode == KeyEvent.VK_DOWN) {
             keys[2] = false;
-        } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+        } else if (keyCode == KeyEvent.VK_LEFT) {
             keys[1] = false;
-        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+        } else if (keyCode == KeyEvent.VK_RIGHT) {
             keys[0] = false;
         }
     }
