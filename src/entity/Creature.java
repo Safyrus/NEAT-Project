@@ -11,6 +11,7 @@ import world.World;
  * Class that represents a creature
  */
 public class Creature extends Entity {
+    private static final long serialVersionUID = 1L;
 
     /**
      * The neural network of the creature
@@ -123,15 +124,19 @@ public class Creature extends Entity {
 
         //displays the creature
         g.fillOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
+        int atk = 0;
+        int grab = 0;
+        int ungrab = 0;
         if (outputAction.contains(ACT_OUT_ATK)) {
-            g.setColor(new Color(255, 0, 0));
-        } else if (outputAction.contains(ACT_OUT_GRAB)) {
-            g.setColor(new Color(0, 0, 255));
-        } else if (outputAction.contains(ACT_OUT_UNGRAB)) {
-            g.setColor(new Color(0, 255, 255));
-        } else {
-            g.setColor(new Color(0, 0, 0));
+            atk = 255;
         }
+        if (outputAction.contains(ACT_OUT_GRAB)) {
+            grab = 255;
+        } 
+        if (outputAction.contains(ACT_OUT_UNGRAB)) {
+            ungrab = 255;
+        }
+        g.setColor(new Color(atk, grab, ungrab));
 
         //displays the creature's orientation
         g.drawOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
@@ -438,6 +443,9 @@ public class Creature extends Entity {
      */
     private void act_out_forward(double res) {
         energy -= 0.02 * Math.abs(res);
+        if(grab != null) {
+            res = res * (5 / grab.size);
+        }
         x += Math.cos(Math.toRadians(angle)) * res * (10 / size);
         y += Math.sin(Math.toRadians(angle)) * res * (10 / size);
     }
@@ -448,6 +456,9 @@ public class Creature extends Entity {
      */
     private void act_out_rotate(double res) {
         energy -= 0.02 * Math.abs(res);
+        if(grab != null) {
+            res = res * (5 / grab.size);
+        }
         angle += res * (10 / size);
     }
 
@@ -565,7 +576,7 @@ public class Creature extends Entity {
     private Creature copyAction(Creature e) {
         e.inputAction = new ArrayList<>();
         for (int i = 0; i < e.nn.getInputSize(); i++) {
-            if (i < inputAction.size() && Math.random() > 0.02) {
+            if (i < inputAction.size() && Math.random() > 0.01) {
                 e.inputAction.add(inputAction.get(i));
             } else {
                 e.inputAction.add(randomActIn());
@@ -573,7 +584,7 @@ public class Creature extends Entity {
         }
         e.outputAction = new ArrayList<>();
         for (int i = 0; i < e.nn.getOutputSize(); i++) {
-            if (i < outputAction.size() && Math.random() > 0.02) {
+            if (i < outputAction.size() && Math.random() > 0.01) {
                 e.outputAction.add(outputAction.get(i));
             } else {
                 e.outputAction.add(randomActOut());

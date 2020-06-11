@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.ListIterator;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.io.Serializable;
 
 import entity.Creature;
 import entity.Entity;
@@ -14,7 +15,9 @@ import entity.Meat;
 /**
  * This class represents a world with entities that evolve in it
  */
-public class World {
+public class World implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     /**
      * the x coordinate of the world
      */
@@ -91,13 +94,16 @@ public class World {
 
         // displays the number of entities in each cell of the grid
         g.setColor(new Color(0, 0, 0));
-        for (int i = 0; i < h / cellSize; i++) {
-            for (int j = 0; j < w / cellSize; j++) {
-                if (grid.get(i * w / cellSize + j) != null) {
-                    g.drawString("" + grid.get(i * w / cellSize + j).size(), j * cellSize + cellSize / 2 + x + offx,
-                            i * cellSize + cellSize / 2 + y + offy);
-                } else {
-                    g.drawString("0", j * cellSize + cellSize / 2 + x + offx, i * cellSize + cellSize / 2 + y + offy);
+        if (grid != null) {
+            for (int i = 0; i < h / cellSize; i++) {
+                for (int j = 0; j < w / cellSize; j++) {
+                    if (grid.get(i * w / cellSize + j) != null) {
+                        g.drawString("" + grid.get(i * w / cellSize + j).size(), j * cellSize + cellSize / 2 + x + offx,
+                                i * cellSize + cellSize / 2 + y + offy);
+                    } else {
+                        g.drawString("0", j * cellSize + cellSize / 2 + x + offx,
+                                i * cellSize + cellSize / 2 + y + offy);
+                    }
                 }
             }
         }

@@ -2,11 +2,13 @@ package nn;
 
 import java.util.ArrayList;
 import java.awt.Graphics;
+import java.io.Serializable;
 
 /**
  * Class that represente a neural network
  */
-public class NeuralNetwork {
+public class NeuralNetwork implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     /**
      * array of neurons that constitute the network
@@ -64,19 +66,19 @@ public class NeuralNetwork {
             if (mutType < 0.3) {
                 // add connection
                 mutAddLink();
-            } else if (mutType < 0.34) {
+            } else if (mutType < 0.32) {
                 // add an input neurone
                 mutAddInputNeuron();
-            } else if (mutType < 0.38) {
+            } else if (mutType < 0.34) {
                 // add an output neurone
                 mutAddOutputNeuron();
-            } else if (mutType < 0.48) {
+            } else if (mutType < 0.35) {
                 // add neuron at a layer
                 mutAddLayerNeuron();
-            } else if (mutType < 0.58) {
+            } else if (mutType < 0.37) {
                 // add neuron at a existing connection
                 mutAddNeuron();
-            } else if (mutType < 0.65) {
+            } else if (mutType < 0.375) {
                 // add neuron at a existing connection
                 mutRemoveNeuron();
             } else if (mutType < 1) {

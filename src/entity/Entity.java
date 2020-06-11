@@ -1,13 +1,16 @@
 package entity;
 
 import java.awt.Graphics;
+import java.io.Serializable;
 
 import world.World;
 
 /**
  * Abstract Class that represente an Entity
  */
-public abstract class Entity {
+public abstract class Entity implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     /**
      * the world in which the entity is in
      */

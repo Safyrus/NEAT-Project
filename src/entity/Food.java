@@ -9,6 +9,7 @@ import world.World;
  * Class that represente Food
  */
 public class Food extends Entity {
+    private static final long serialVersionUID = 1L;
 
     /**
      * Default constructor
