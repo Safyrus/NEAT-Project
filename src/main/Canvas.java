@@ -104,10 +104,12 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         crea = null;
         menu = false;
         selected = 0;
-        strBuf = new String[3];
+        strBuf = new String[5];
         strBuf[0] = "";
         strBuf[1] = "10";
         strBuf[2] = "worldSave";
+        strBuf[3] = "800";
+        strBuf[4] = "800";
         pause = false;
         camX = 0;
         camY = 0;
@@ -123,12 +125,22 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
      */
     private void createWorld() {
         int entityStart = 10;
+        int worldW = 800;
+        int worldH = 800;
         try {
             entityStart = Integer.parseInt(strBuf[1]);
         } catch (Exception e) {
         }
-        
-        world = new World(800, 800);
+        try {
+            worldW = Integer.parseInt(strBuf[3]);
+        } catch (Exception e) {
+        }
+        try {
+            worldH = Integer.parseInt(strBuf[4]);
+        } catch (Exception e) {
+        }
+
+        world = new World(worldW, worldH);
         for (int i = 0; i < entityStart; i++) {
             Creature c = new Creature(world);
             c.setX(Math.random() * world.getW());
@@ -216,6 +228,18 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
                 g.setColor(grey);
             }
             g.fillRect(menuX + 90, menuY + 30, 120, 30);
+            if (selected == 3) {
+                g.setColor(yellow);
+            } else {
+                g.setColor(grey);
+            }
+            g.fillRect(menuX + 140, menuY + 90, 40, 30);
+            if (selected == 4) {
+                g.setColor(yellow);
+            } else {
+                g.setColor(grey);
+            }
+            g.fillRect(menuX + 190, menuY + 90, 40, 30);
 
             // displays texts
             g.setColor(new Color(0, 0, 0, opacity));
@@ -224,6 +248,8 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
             g.drawString("REGEN", menuX + 12, menuY + 110);
             g.drawString(strBuf[1], menuX + 90, menuY + 110);
             g.drawString(strBuf[2], menuX + 90, menuY + 50);
+            g.drawString(strBuf[3], menuX + 140, menuY + 110);
+            g.drawString(strBuf[4], menuX + 190, menuY + 110);
 
             // resets the font
             g.setFont(font);
@@ -322,6 +348,12 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
             } else if (e.getX() > menuX + 90 && e.getX() < menuX + 210 && e.getY() > menuY + 30
                     && e.getY() < menuY + 60) {
                 selected = 2;
+            } else if (e.getX() > menuX + 140 && e.getX() < menuX + 180 && e.getY() > menuY + 90
+                    && e.getY() < menuY + 120) {
+                selected = 3;
+            } else if (e.getX() > menuX + 190 && e.getX() < menuX + 230 && e.getY() > menuY + 90
+                    && e.getY() < menuY + 120) {
+                selected = 4;
             } else {
                 selected = 0;
             }
