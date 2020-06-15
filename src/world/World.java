@@ -52,6 +52,10 @@ public class World implements Serializable {
      */
     private int cellSize;
 
+    private int creaCount;
+    private int foodCount;
+    private int meatCount;
+
     /**
      * Default constructor
      * 
@@ -63,6 +67,9 @@ public class World implements Serializable {
         this.y = 0;
         this.w = w;
         this.h = h;
+        creaCount = 0;
+        foodCount = 0;
+        meatCount = 0;
 
         toAdd = new ArrayList<>();
         this.entities = new ArrayList<>();
@@ -76,43 +83,68 @@ public class World implements Serializable {
      * @param offx the x coordinate offset
      * @param offy the y coordinate offset
      */
-    public void display(Graphics g, int offx, int offy) {
+    public void display(Graphics g, int offx, int offy, boolean debug) {
 
         // displays the background
         g.setColor(new Color(128, 128, 128));
         g.fillRect(x + offx, y + offy, w, h);
 
         // displays all the entities
-        int creaCount = 0;
+        creaCount = 0;
+        foodCount = 0;
+        meatCount = 0;
         for (int i = 0; i < entities.size(); i++) {
             Entity entity = entities.get(i);
             if (entity.getClass() == Creature.class) {
                 creaCount++;
+            } else if (entity.getClass() == Food.class) {
+                foodCount++;
+            } else if (entity.getClass() == Meat.class) {
+                meatCount++;
             }
             entity.display(g, x + offx, y + offy);
         }
 
         // displays the number of entities in each cell of the grid
-        g.setColor(new Color(0, 0, 0));
-        if (grid != null) {
-            for (int i = 0; i < h / cellSize; i++) {
-                for (int j = 0; j < w / cellSize; j++) {
-                    if (grid.get(i * w / cellSize + j) != null) {
-                        g.drawString("" + grid.get(i * w / cellSize + j).size(), j * cellSize + cellSize / 2 + x + offx,
-                                i * cellSize + cellSize / 2 + y + offy);
-                    } else {
-                        g.drawString("0", j * cellSize + cellSize / 2 + x + offx,
-                                i * cellSize + cellSize / 2 + y + offy);
+        if (debug) {
+            g.setColor(new Color(0, 0, 0));
+            if (grid != null) {
+                for (int i = 0; i < h / cellSize; i++) {
+                    for (int j = 0; j < w / cellSize; j++) {
+                        if (grid.get(i * w / cellSize + j) != null) {
+                            g.drawString("" + grid.get(i * w / cellSize + j).size(),
+                                    j * cellSize + cellSize / 2 + x + offx, i * cellSize + cellSize / 2 + y + offy);
+                        } else {
+                            g.drawString("0", j * cellSize + cellSize / 2 + x + offx,
+                                    i * cellSize + cellSize / 2 + y + offy);
+                        }
                     }
                 }
             }
         }
+    }
 
-        // displays info about the world
-        g.setColor(new Color(120, 0, 0));
-        g.drawString(x + " " + y, 20, 10);
-        g.drawString("All:" + entities.size(), 20, 30);
-        g.drawString("Crea:" + creaCount, 20, 40);
+    /**
+     * Displays info about the world
+     * @param g
+     * @param scrW width of the screen
+     * @param scrH height of the screen
+     */
+    public void displayInfo(Graphics g, int scrW, int scrH) {
+
+        // displays a rect
+        int lw = 100;
+        int lh = 100;
+        g.setColor(new Color(255, 255, 255, 128));
+        g.fillRect(scrW - lw, 0, lw, lh);
+        g.setColor(new Color(0, 0, 0));
+        g.drawRect(scrW - lw, -1, lw+1, lh);
+
+        // displays infos
+        g.drawString("Entities:" + (creaCount + foodCount + meatCount), scrW-lw+10, 20);
+        g.drawString("Food:" + foodCount, scrW-lw+10, 35);
+        g.drawString("Crea:" + creaCount, scrW-lw+10, 50);
+        g.drawString("Meat:" + meatCount, scrW-lw+10, 65);
     }
 
     /**

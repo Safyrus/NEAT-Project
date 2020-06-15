@@ -178,6 +178,8 @@ public class Creature extends Entity {
         g.setColor(new Color(255, 255, 255, 128));
         int rectH = Math.max(nn.getInputSize(), nn.getOutputSize());
         g.fillRect(0, 0, nn.getLayerSize() * 40 + 50, rectH * 40 + 40);
+        g.setColor(new Color(0, 0, 0));
+        g.drawRect(-1, -1, nn.getLayerSize() * 40 + 50, rectH * 40 + 40);
 
         //displays the neural network
         nn.display(g, 0, 0);

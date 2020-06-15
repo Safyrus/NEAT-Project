@@ -89,8 +89,28 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
      */
     private int menuH;
 
+    /**
+     * do we need to save ?
+     */
     private boolean save;
+    /**
+     * do we need to load ?
+     */
     private boolean load;
+    /**
+     * is a click occured ?
+     */
+    private boolean click;
+    /**
+     * x-position of the mouse
+     */
+    private int mx;
+    /**
+     * y-position of the mouse
+     */
+    private int my;
+
+    private boolean debug;
 
     /**
      * Default constructor
@@ -103,6 +123,10 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         this.addMouseListener(this);
         crea = null;
         menu = false;
+        click = false;
+        save = false;
+        load = false;
+        debug = false;
         selected = 0;
         strBuf = new String[5];
         strBuf[0] = "";
@@ -150,6 +174,18 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
     }
 
     /**
+     * get a creature on the screen
+     */
+    private void selectCreature() {
+        Entity entity = world.GetEntity(mx + (int) (camX), my + (int) (camY));
+        if (entity != null) {
+            if (entity.getClass() == Creature.class) {
+                crea = (Creature) entity;
+            }
+        }
+    }
+
+    /**
      * Calculates one step of the simulation
      */
     public void step() {
@@ -169,6 +205,11 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
             load = false;
         }
 
+        if (click) {
+            selectCreature();
+            click = false;
+        }
+
         if (!pause) {
             world.step();
         }
@@ -183,7 +224,8 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         super.paint(g);
 
         // displays the world
-        world.display(g, (int) (-camX), (int) (-camY));
+        world.display(g, (int) (-camX), (int) (-camY), debug);
+        world.displayInfo(g, getWidth(), getHeight());
 
         // hightlights the selected creature and display his information
         if (crea != null && !menu) {
@@ -254,8 +296,10 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
             // resets the font
             g.setFont(font);
         } else {
-            // displays the neuralNetwork
-            nn.display(g, getWidth() - (nn.getLayerSize() * 40) - 20, 0);
+            if (debug) {
+                // displays the neuralNetwork
+                nn.display(g, getWidth() - (nn.getLayerSize() * 40) - 20, 0);
+            }
         }
     }
 
@@ -325,14 +369,10 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
     @Override
     public void mousePressed(MouseEvent e) {
         if (!menu) {
-            Entity entity = world.GetEntity(e.getX() + (int) (camX), e.getY() + (int) (camY));
-            if (entity != null) {
-                if (entity.getClass() == Creature.class) {
-                    crea = (Creature) entity;
-                }
-            } else {
-                crea = null;
-            }
+            crea = null;
+            click = true;
+            mx = e.getX();
+            my = e.getY();
         } else {
             if (e.getX() > menuX + 10 && e.getX() < menuX + 70 && e.getY() > menuY + 10 && e.getY() < menuY + 40) {
                 save = true;
@@ -381,12 +421,15 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         char key = e.getKeyChar();
         int keyCode = e.getKeyCode();
 
+        if (key == 'd') {
+            debug = !debug;
+        }
         if (selected == 0) {
             if (key == 'p') {
                 pause = !pause;
-            } else if (key == 'm') {
+            } else if (key == 'm' && debug) {
                 nn.mutate();
-            } else if (key == 'c') {
+            } else if (key == 'c' && debug) {
                 nn = nn.copy();
             } else if (key == '+') {
                 camSpd *= 2;
