@@ -131,7 +131,7 @@ public abstract class Entity implements Serializable {
      * @param offx the x coordinate offset
      * @param offy the x coordinate offset
      */
-    public abstract void display(Graphics g, int offx, int offy);
+    public abstract void display(Graphics g, int offx, int offy, double zoom);
 
     /**
      * Actions made by the entity
@@ -140,6 +140,7 @@ public abstract class Entity implements Serializable {
 
     /**
      * checks if the entity collide with another entity
+     * 
      * @param e other entity
      * @return boolean true if the two collide
      */
@@ -150,6 +151,7 @@ public abstract class Entity implements Serializable {
 
     /**
      * checks if the entity collide with a point
+     * 
      * @param xx the x coordinate of the point
      * @param yy the y coordinate of the point
      * @return boolean true if the two collide

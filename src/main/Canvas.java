@@ -60,6 +60,9 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
      * speed of the camera
      */
     private double camSpd;
+
+    private double camZoom;
+
     /**
      * keys pressed
      */
@@ -137,6 +140,7 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         pause = false;
         camX = 0;
         camY = 0;
+        camZoom = 1;
         camSpd = 4;
         keys = new boolean[4];
 
@@ -177,7 +181,8 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
      * get a creature on the screen
      */
     private void selectCreature() {
-        Entity entity = world.GetEntity(mx + (int) (camX), my + (int) (camY));
+        Entity entity = world.GetEntity((int) ((mx + (camX * camZoom)) / camZoom),
+                (int) ((my + (camY * camZoom)) / camZoom));
         if (entity != null) {
             if (entity.getClass() == Creature.class) {
                 crea = (Creature) entity;
@@ -224,12 +229,12 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
         super.paint(g);
 
         // displays the world
-        world.display(g, (int) (-camX), (int) (-camY), debug);
+        world.display(g, (int) (-camX), (int) (-camY), camZoom, debug);
         world.displayInfo(g, getWidth(), getHeight());
 
         // hightlights the selected creature and display his information
         if (crea != null && !menu) {
-            crea.displayHighlight(g, (int) (-camX), (int) (-camY));
+            crea.displayHighlight(g, (int) (-camX), (int) (-camY), camZoom);
             crea.displayNN(g);
         }
 
@@ -435,6 +440,13 @@ public class Canvas extends JPanel implements MouseListener, KeyListener {
                 camSpd *= 2;
             } else if (key == '-') {
                 camSpd /= 2;
+            } else if (key == '*') {
+                camZoom *= 2;
+            } else if (key == '/') {
+                camZoom /= 2;
+            } else if (key == 'r') {
+                camX = 0;
+                camY = 0;
             }
         } else {
             if (keyCode == KeyEvent.VK_BACK_SPACE) {

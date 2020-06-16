@@ -18,8 +18,9 @@ public class Meat extends Entity {
      */
     public Meat(World world) {
         super(world);
-        energy = Math.random()*9 + 1;
+        energy = Math.random() * 9 + 1;
     }
+
     /**
      * Displays the Meat
      * 
@@ -28,16 +29,16 @@ public class Meat extends Entity {
      * @param offy the x coordinate offset
      */
     @Override
-    public void display(Graphics g, int offx, int offy) {
+    public void display(Graphics g, int offx, int offy, double zoom) {
         double tmpX = x;
         double tmpY = y;
         x += offx;
         y += offy;
 
-        int r = (energy > 10)?255:(int)(150 + 10*energy);
+        int r = (energy > 10) ? 255 : (int) (150 + 10 * energy);
         g.setColor(new Color(r, 0, 0));
-        size = (int)(5+energy);
-        g.fillOval((int)(x-size/2), (int)(y-size/2), (int)size, (int)size);
+        g.fillOval((int) ((x - size / 2) * zoom), (int) ((y - size / 2) * zoom), (int) (size * zoom),
+                (int) (size * zoom));
 
         x = tmpX;
         y = tmpY;
@@ -49,6 +50,7 @@ public class Meat extends Entity {
     @Override
     public void step() {
         energy -= 0.01;
+        size = (int) (5 + energy);
     }
-    
+
 }

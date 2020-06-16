@@ -83,11 +83,11 @@ public class World implements Serializable {
      * @param offx the x coordinate offset
      * @param offy the y coordinate offset
      */
-    public void display(Graphics g, int offx, int offy, boolean debug) {
+    public void display(Graphics g, int offx, int offy, double zoom, boolean debug) {
 
         // displays the background
         g.setColor(new Color(128, 128, 128));
-        g.fillRect(x + offx, y + offy, w, h);
+        g.fillRect((int) ((x + offx) * zoom), (int) ((y + offy) * zoom), (int) (w * zoom), (int) (h * zoom));
 
         // displays all the entities
         creaCount = 0;
@@ -102,7 +102,7 @@ public class World implements Serializable {
             } else if (entity.getClass() == Meat.class) {
                 meatCount++;
             }
-            entity.display(g, x + offx, y + offy);
+            entity.display(g, x + offx, y + offy, zoom);
         }
 
         // displays the number of entities in each cell of the grid
@@ -111,12 +111,12 @@ public class World implements Serializable {
             if (grid != null) {
                 for (int i = 0; i < h / cellSize; i++) {
                     for (int j = 0; j < w / cellSize; j++) {
+                        int textX = (int) ((j * cellSize + cellSize / 2 + x + offx) * zoom);
+                        int textY = (int) ((i * cellSize + cellSize / 2 + y + offy) * zoom);
                         if (grid.get(i * w / cellSize + j) != null) {
-                            g.drawString("" + grid.get(i * w / cellSize + j).size(),
-                                    j * cellSize + cellSize / 2 + x + offx, i * cellSize + cellSize / 2 + y + offy);
+                            g.drawString("" + grid.get(i * w / cellSize + j).size(), textX, textY);
                         } else {
-                            g.drawString("0", j * cellSize + cellSize / 2 + x + offx,
-                                    i * cellSize + cellSize / 2 + y + offy);
+                            g.drawString("0", textX, textY);
                         }
                     }
                 }
@@ -126,6 +126,7 @@ public class World implements Serializable {
 
     /**
      * Displays info about the world
+     * 
      * @param g
      * @param scrW width of the screen
      * @param scrH height of the screen
@@ -138,13 +139,13 @@ public class World implements Serializable {
         g.setColor(new Color(255, 255, 255, 128));
         g.fillRect(scrW - lw, 0, lw, lh);
         g.setColor(new Color(0, 0, 0));
-        g.drawRect(scrW - lw, -1, lw+1, lh);
+        g.drawRect(scrW - lw, -1, lw + 1, lh);
 
         // displays infos
-        g.drawString("Entities:" + (creaCount + foodCount + meatCount), scrW-lw+10, 20);
-        g.drawString("Food:" + foodCount, scrW-lw+10, 35);
-        g.drawString("Crea:" + creaCount, scrW-lw+10, 50);
-        g.drawString("Meat:" + meatCount, scrW-lw+10, 65);
+        g.drawString("Entities:" + (creaCount + foodCount + meatCount), scrW - lw + 10, 20);
+        g.drawString("Food:" + foodCount, scrW - lw + 10, 35);
+        g.drawString("Crea:" + creaCount, scrW - lw + 10, 50);
+        g.drawString("Meat:" + meatCount, scrW - lw + 10, 65);
     }
 
     /**

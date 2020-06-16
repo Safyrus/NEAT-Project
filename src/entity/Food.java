@@ -18,10 +18,9 @@ public class Food extends Entity {
      */
     public Food(World world) {
         super(world);
-        energy = Math.random()*19 + 1;
+        energy = Math.random() * 19 + 1;
     }
 
-    
     /**
      * Displays the Food
      * 
@@ -30,16 +29,16 @@ public class Food extends Entity {
      * @param offy the x coordinate offset
      */
     @Override
-    public void display(Graphics g, int offx, int offy) {
+    public void display(Graphics g, int offx, int offy, double zoom) {
         double tmpX = x;
         double tmpY = y;
         x += offx;
         y += offy;
 
-        int green = (energy > 10)?255:(int)(150 + 10*energy);
+        int green = (energy > 10) ? 255 : (int) (150 + 10 * energy);
         g.setColor(new Color(0, green, 0));
-        size = (int)(5+energy);
-        g.fillOval((int)(x-size/2), (int)(y-size/2), (int)size, (int)size);
+        g.fillOval((int) ((x - size / 2) * zoom), (int) ((y - size / 2) * zoom), (int) (size * zoom),
+                (int) (size * zoom));
 
         x = tmpX;
         y = tmpY;
@@ -51,6 +50,7 @@ public class Food extends Entity {
     @Override
     public void step() {
         energy -= 0.01;
+        size = (int) (5 + energy);
     }
-    
+
 }
